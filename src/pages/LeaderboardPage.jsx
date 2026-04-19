@@ -18,7 +18,8 @@ const medalClasses = ['gold', 'silver', 'bronze'];
 export function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState('earnings');
   const user = useAuthStore((s) => s.user);
-  const leaderData = useMeetingsStore((s) => s.getLeaderboardData());
+  const mStore = useMeetingsStore();
+  const leaderData = mStore.getLeaderboardData();
 
   const getValue = () => {
     switch (activeTab) {

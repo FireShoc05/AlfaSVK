@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
+import { ErrorBoundary } from '../ErrorBoundary';
 import '../../styles/layout.css';
 
 export function AppLayout() {
@@ -8,7 +9,9 @@ export function AppLayout() {
     <div className="app-layout">
       <Sidebar />
       <main className="app-layout__content">
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <BottomNav />
     </div>

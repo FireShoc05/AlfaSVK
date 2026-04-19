@@ -16,12 +16,14 @@ import {
 
 export function ProfilePage() {
   const user = useAuthStore((s) => s.user);
-  const todayEarnings = useMeetingsStore((s) => s.getTodayEarnings());
-  const monthEarnings = useMeetingsStore((s) => s.getMonthEarnings());
-  const todayMeetings = useMeetingsStore((s) => s.getTodayMeetings());
-  const monthMeetings = useMeetingsStore((s) => s.getMonthMeetings());
-  const productStats = useMeetingsStore((s) => s.getProductStats());
-  const chartData = useMeetingsStore((s) => s.getMonthlyChartData());
+  const mStore = useMeetingsStore();
+  
+  const todayEarnings = mStore.getTodayEarnings();
+  const monthEarnings = mStore.getMonthEarnings();
+  const todayMeetings = mStore.getTodayMeetings();
+  const monthMeetings = mStore.getMonthMeetings();
+  const productStats = mStore.getProductStats();
+  const chartData = mStore.getMonthlyChartData();
   const maxChart = Math.max(...chartData, 1);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
