@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   CalendarPlus,
   Trophy,
@@ -6,6 +6,7 @@ import {
   KeyRound,
   ArrowRightLeft,
   Shield,
+  LogOut,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -23,6 +24,13 @@ const secondaryNav = [
 
 export function Sidebar() {
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <aside className="sidebar">
@@ -81,6 +89,9 @@ export function Sidebar() {
             <div className="sidebar__user-name">{user.fullName}</div>
             <div className="sidebar__user-role">{user.username}</div>
           </div>
+          <button className="sidebar__logout" onClick={handleLogout} title="Выйти">
+            <LogOut size={18} />
+          </button>
         </div>
       )}
     </aside>
