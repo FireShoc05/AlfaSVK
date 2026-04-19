@@ -165,6 +165,7 @@ export function AdminDashboard() {
                     <th>Сотрудник</th>
                     <th>Логин</th>
                     <th>Вр. пароль</th>
+                    <th>Контакты</th>
                     <th>Роль</th>
                     <th>Статус</th>
                     <th>Онборд</th>
@@ -188,6 +189,12 @@ export function AdminDashboard() {
                         <button className="copy-btn" onClick={() => copyToClipboard(u.tempPassword, u.id + 'pass')}>
                           {copiedId === u.id + 'pass' ? <Check size={14} color="var(--success)"/> : <Copy size={14} />}
                         </button>
+                      </td>
+                      <td style={{ fontSize: '0.85em', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                        {u.phone && <div>📞 {u.phone}</div>}
+                        {u.telegram && <div>✈️ {u.telegram}</div>}
+                        {u.email && <div>✉️ {u.email}</div>}
+                        {!u.phone && !u.telegram && !u.email && <span style={{opacity: 0.5}}>Нет данных</span>}
                       </td>
                       <td>
                         <Badge variant={u.role === 'admin' ? 'accent' : 'primary'}>

@@ -25,17 +25,16 @@ export function ProtectedRoute({ children, allowedRoles }) {
     const path = location.pathname;
 
     // 1. Проверка онбординга (высший приоритет)
-    // Если агент не прошел онбординг — можно только /onboarding и /training
-    if (!user.onboarded) {
-      if (path !== '/onboarding' && path !== '/training') {
+    // Если агент не прошел онбординг или не сменил пароль — можно только /onboarding
+    if (!user.onboarded || !user.passwordChanged) {
+      if (path !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
       }
       // Если на /onboarding — показываем (даже если стажер)
-      // Если на /training — тоже показываем
       return children ? children : <Outlet />;
     }
 
-    // Дальше: user.onboarded === true
+    // Дальше: user.onboarded === true && user.passwordChanged === true
 
     // Если прошел онбординг, но пытается зайти на /onboarding -> домой
     if (path === '/onboarding') {

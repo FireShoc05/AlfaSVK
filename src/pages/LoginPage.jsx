@@ -19,8 +19,11 @@ export function LoginPage() {
     e.preventDefault();
     setError('');
 
+    const trimmedLogin = loginInput.trim();
+    const trimmedPassword = passwordInput.trim();
+
     // 1. Хардкод Админа
-    if (loginInput === 'LitvinukADM' && passwordInput === 'Alfabank050505') {
+    if (trimmedLogin.toLowerCase() === 'litvinukadm' && trimmedPassword === 'Alfabank050505') {
       login({
         id: 'admin_root',
         fullName: 'Главный Администратор',
@@ -33,7 +36,7 @@ export function LoginPage() {
     }
 
     // 2. Поиск в локальной базе
-    const foundUser = findUser(loginInput, passwordInput);
+    const foundUser = findUser(trimmedLogin, trimmedPassword);
     if (foundUser) {
       login(foundUser);
       // ProtectedRoute дальше сам раскидает пользователя (на onboarding, training или meeting)

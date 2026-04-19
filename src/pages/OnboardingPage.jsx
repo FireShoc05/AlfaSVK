@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUsersStore } from '../store/useUsersStore';
 import { GlassCard, Button, InputGroup } from '../components/ui';
-import '../styles/login.css'; // We can reuse the login layout for onboarding
+import '../styles/login.css';
 
 export function OnboardingPage() {
   const { user, updateUser: updateAuthUser } = useAuthStore();
   const updateStoreUser = useUsersStore(s => s.updateUser);
   const navigate = useNavigate();
 
-  const [phone, setPhone] = useState('');
-  const [telegram, setTelegram] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [telegram, setTelegram] = useState(user?.telegram || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -20,7 +22,17 @@ export function OnboardingPage() {
     setError('');
 
     if (!phone.trim() && !telegram.trim() && !email.trim()) {
-      setError('Необходимо заполнить хотя бы одно поле (Телефон, Telegram или Email)');
+      setError('Необходимо заполнить хотя бы одно поле контакта (Телефон, Telegram или Email)');
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      setError('Пароль должен содержать минимум 6 символов');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Пароли не совпадают');
       return;
     }
 
@@ -29,6 +41,8 @@ export function OnboardingPage() {
       telegram: telegram.trim(),
       email: email.trim(),
       onboarded: true,
+      passwordChanged: true,
+      tempPassword: newPassword, // Обновляем пароль
     };
 
     // Обновляем текущую сессию
@@ -50,7 +64,11 @@ export function OnboardingPage() {
       <div className="login-container">
         <div className="login-branding" style={{ marginBottom: 16 }}>
           <h2>Добро пожаловать, {user?.fullName}!</h2>
-          <p>Для завершения настройки профиля укажите контактные данные. <br /><strong>Заполните хотя бы одно поле.</strong></p>
+          <p>
+            Для завершения настройки профиля <strong>укажите контактные данные</strong> и <strong>смените пароль</strong>.
+            <br />
+            (Заполните хотя бы одно поле из контактов)
+          </p>
         </div>
 
         <GlassCard className="login-card">
@@ -79,10 +97,29 @@ export function OnboardingPage() {
               onChange={setEmail}
             />
             
+            <div style={{ marginTop: 16, marginBottom: 16, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16 }}>
+              <InputGroup 
+                id="new-password" 
+                label="Новый пароль" 
+                type="password"
+                placeholder="Минимум 6 символов"
+                value={newPassword}
+                onChange={setNewPassword}
+              />
+              <InputGroup 
+                id="confirm-password" 
+                label="Подтвердите новый пароль" 
+                type="password"
+                placeholder="Повторите пароль"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+              />
+            </div>
+
             {error && <div className="login-error">{error}</div>}
 
             <Button type="submit" block variant="primary" style={{ marginTop: 16 }}>
-              Подтвердить и продолжить
+              Сохранить и продолжить
             </Button>
           </form>
         </GlassCard>

@@ -52,7 +52,10 @@ export const useUsersStore = create(
       findUserByCredentials: (login, password) => {
         const { users } = get();
         // Since it's a SPA prototype, we store tempPassword for the first login checks
-        return users.find(u => u.username === login && u.tempPassword === password);
+        return users.find(u => 
+          u.username.toLowerCase() === login.toLowerCase() && 
+          u.tempPassword === password
+        );
       }
     }),
     {
