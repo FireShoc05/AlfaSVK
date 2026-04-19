@@ -15,8 +15,8 @@ export const useMeetingsStore = create(
       // Получить встречи за сегодня
       getTodayMeetings: () => {
         const today = new Date().toISOString().split('T')[0];
-        return get().meetings.filter(
-          (m) => m.meeting_timestamp.startsWith(today)
+        return (get().meetings || []).filter(
+          (m) => m?.meeting_timestamp?.startsWith(today)
         );
       },
 
@@ -24,19 +24,19 @@ export const useMeetingsStore = create(
       getMonthMeetings: () => {
         const now = new Date();
         const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        return get().meetings.filter(
-          (m) => m.meeting_timestamp.startsWith(yearMonth)
+        return (get().meetings || []).filter(
+          (m) => m?.meeting_timestamp?.startsWith(yearMonth)
         );
       },
 
       // Сумма заработка за сегодня
       getTodayEarnings: () => {
-        return get().getTodayMeetings().reduce((sum, m) => sum + m.total_earned, 0);
+        return get().getTodayMeetings().reduce((sum, m) => sum + (m?.total_earned || 0), 0);
       },
 
       // Сумма заработка за месяц
       getMonthEarnings: () => {
-        return get().getMonthMeetings().reduce((sum, m) => sum + m.total_earned, 0);
+        return get().getMonthMeetings().reduce((sum, m) => sum + (m?.total_earned || 0), 0);
       },
 
       // Подсчёт продуктов для таблиц
@@ -65,7 +65,7 @@ export const useMeetingsStore = create(
       // Данные для лидерборда
       getLeaderboardData: () => {
         const meetings = get().meetings;
-        const totalEarned = meetings.reduce((sum, m) => sum + m.total_earned, 0);
+        const totalEarned = meetings.reduce((sum, m) => sum + (m?.total_earned || 0), 0);
 
         // Подсчёт БС и КЛ
         let bsCount = 0;
@@ -91,11 +91,13 @@ export const useMeetingsStore = create(
         const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
         const dailyData = Array(daysInMonth).fill(0);
-        get().meetings
-          .filter((m) => m.meeting_timestamp.startsWith(yearMonth))
+        (get().meetings || [])
+          .filter((m) => m?.meeting_timestamp?.startsWith(yearMonth))
           .forEach((m) => {
             const day = new Date(m.meeting_timestamp).getDate() - 1;
-            dailyData[day] += m.total_earned;
+            if (!isNaN(day)) {
+              dailyData[day] += (m.total_earned || 0);
+            }
           });
 
         return dailyData;
