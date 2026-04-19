@@ -4,7 +4,8 @@ import { MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES } from '../data/products';
  * Форматирует число как валюту (рубли)
  */
 export function formatCurrency(amount) {
-  return `${amount.toLocaleString('ru-RU')} ₽`;
+  if (amount == null || isNaN(Number(amount))) return '0 ₽';
+  return `${Number(amount).toLocaleString('ru-RU')} ₽`;
 }
 
 /**

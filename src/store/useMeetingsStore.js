@@ -41,20 +41,25 @@ export const useMeetingsStore = create(
 
       // Подсчёт продуктов для таблиц
       getProductStats: () => {
-        const meetings = get().meetings;
+        const meetings = get().meetings || [];
         const mainStats = {};
         const crossStats = {};
 
-        meetings.forEach((m) => {
-          (m.products || []).forEach((p) => {
-            const stats = p.type === 'main' ? mainStats : crossStats;
-            if (!stats[p.name]) {
-              stats[p.name] = { name: p.name, count: 0, earned: 0 };
-            }
-            stats[p.name].count += p.quantity || 1;
-            stats[p.name].earned += p.earned;
+        try {
+          meetings.forEach((m) => {
+            (m?.products || []).forEach((p) => {
+              if (!p || !p.name) return;
+              const stats = p.type === 'main' ? mainStats : crossStats;
+              if (!stats[p.name]) {
+                stats[p.name] = { name: p.name, count: 0, earned: 0 };
+              }
+              stats[p.name].count += p.quantity || 1;
+              stats[p.name].earned += p.earned || 0;
+            });
           });
-        });
+        } catch (error) {
+          console.error("Failed to parse product stats", error);
+        }
 
         return {
           main: Object.values(mainStats),
