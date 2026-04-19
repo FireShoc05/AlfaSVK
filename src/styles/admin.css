@@ -1,0 +1,114 @@
+/* admin.css */
+.admin-layout {
+  min-height: 100vh;
+  background-color: #080808;
+  color: white;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.admin-header__brand h2 {
+  font-size: var(--font-xl);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.admin-content {
+  padding: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-card {
+  padding: var(--space-lg);
+}
+
+.admin-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-lg);
+  font-weight: 700;
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+}
+
+.admin-form__row {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  align-items: flex-end;
+}
+
+.admin-empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 8px;
+}
+
+.admin-table-container {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  text-align: left;
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: var(--space-sm) var(--space-sm);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-table td {
+  padding: var(--space-md) var(--space-sm);
+  font-size: var(--font-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+.monospace-cell {
+  font-family: monospace;
+  font-size: var(--font-base);
+  letter-spacing: 1px;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}

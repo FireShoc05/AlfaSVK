@@ -1,5 +1,6 @@
 import '../styles/profile.css';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useMeetingsStore } from '../store/useMeetingsStore';
 import { GlassCard, Button, Modal, InputGroup, Badge, Tabs } from '../components/ui';
@@ -12,11 +13,13 @@ import {
   Lock,
   Package,
   Layers,
+  ShieldAlert,
 } from 'lucide-react';
 
 export function ProfilePage() {
   const user = useAuthStore((s) => s.user);
   const mStore = useMeetingsStore();
+  const navigate = useNavigate();
   
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [statsPeriod, setStatsPeriod] = useState('month');
@@ -63,9 +66,16 @@ export function ProfilePage() {
             <span>Активность: {new Date().toLocaleDateString('ru-RU')}</span>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => setShowPasswordModal(true)}>
-          <Lock size={14} /> Сменить пароль
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {user?.role === 'admin' && (
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin')} style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+              <ShieldAlert size={14} style={{ marginRight: 8 }} /> Управление (Админ-панель)
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={() => setShowPasswordModal(true)}>
+            <Lock size={14} style={{ marginRight: 8 }} /> Сменить пароль
+          </Button>
+        </div>
       </GlassCard>
 
       {/* Dashboard Widgets */}
