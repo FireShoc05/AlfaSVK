@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -40,8 +40,12 @@ const generatePassword = () => {
 
 export function AdminDashboard() {
   const { logout } = useAuthStore();
-  const { users, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
+  const { users, fetchUsers, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const [fullName, setFullName] = useState('');
   const [status, setStatus] = useState('Действующий сотрудник');
@@ -52,15 +56,14 @@ export function AdminDashboard() {
     navigate('/login');
   };
 
-  const handleAddUser = (e) => {
+  const handleAddUser = async (e) => {
     e.preventDefault();
     if (!fullName.trim()) return;
 
     const newLogin = generateLogin(fullName);
     const newPassword = generatePassword();
 
-    addUser({
-      id: `user_${Date.now()}`,
+    await addUser({
       fullName: fullName.trim(),
       username: newLogin,
       tempPassword: newPassword,
@@ -72,23 +75,23 @@ export function AdminDashboard() {
     setStatus('Действующий сотрудник');
   };
 
-  const handleRegenerate = (userId) => {
+  const handleRegenerate = async (userId) => {
     if (window.confirm('Сгенерировать новый одноразовый пароль для этого сотрудника?')) {
       const newPass = generatePassword();
-      regeneratePassword(userId, newPass);
+      await regeneratePassword(userId, newPass);
     }
   };
 
-  const toggleAdminRole = (userObj) => {
+  const toggleAdminRole = async (userObj) => {
     if (window.confirm(`Изменить права пользователя ${userObj.fullName}?`)) {
       const newRole = userObj.role === 'admin' ? 'agent' : 'admin';
-      updateUser(userObj.id, { role: newRole });
+      await updateUser(userObj.id, { role: newRole });
     }
   };
 
-  const handleDelete = (userObj) => {
+  const handleDelete = async (userObj) => {
     if (window.confirm(`Вы уверены, что хотите безвозвратно удалить сотрудника: ${userObj.fullName}?`)) {
-      deleteUser(userObj.id);
+      await deleteUser(userObj.id);
     }
   };
 

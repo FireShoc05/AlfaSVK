@@ -15,7 +15,7 @@ export function LoginPage() {
   const findUser = useUsersStore(s => s.findUserByCredentials);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -36,7 +36,7 @@ export function LoginPage() {
     }
 
     // 2. Поиск в локальной базе
-    const foundUser = findUser(trimmedLogin, trimmedPassword);
+    const foundUser = await findUser(trimmedLogin, trimmedPassword);
     if (foundUser) {
       login(foundUser);
       // ProtectedRoute дальше сам раскидает пользователя (на onboarding, training или meeting)

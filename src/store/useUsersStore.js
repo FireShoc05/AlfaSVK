@@ -1,65 +1,63 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { supabase } from '../lib/supabaseClient';
 
-export const useUsersStore = create(
-  persist(
-    (set, get) => ({
-      users: [], 
-      
-      /**
-       * Adds a new user to the database
-       */
-      addUser: (user) => set((state) => ({
-        users: [...state.users, {
-          ...user,
-          createdAt: new Date().toISOString(),
-          onboarded: false, // Flag to check if they entered contact info
-        }]
-      })),
+export const useUsersStore = create((set, get) => ({
+  users: [],
+  
+  fetchUsers: async () => {
+    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+    if (error) console.error('Error fetching users:', error);
+    else set({ users: data || [] });
+  },
 
-      /**
-       * Deletes a user from the database
-       */
-      deleteUser: (userId) => set((state) => ({
-        users: state.users.filter(u => u.id !== userId)
-      })),
+  addUser: async (user) => {
+    const dbUser = {
+      fullName: user.fullName,
+      username: user.username,
+      tempPassword: user.tempPassword,
+      role: user.role,
+      status: user.status,
+      joinDate: user.joinDate || new Date().toISOString().split('T')[0]
+    };
+    const { data, error } = await supabase.from('users').insert([dbUser]).select().single();
+    if (error) console.error('Error adding user:', error);
+    else set((state) => ({ users: [data, ...state.users] }));
+  },
 
-      /**
-       * Regenerates password for an existing user
-       */
-      regeneratePassword: (userId, newTempPassword) => set((state) => ({
-        users: state.users.map(u => 
-          u.id === userId 
-            ? { ...u, tempPassword: newTempPassword }
-            : u
-        )
-      })),
+  deleteUser: async (userId) => {
+    const { error } = await supabase.from('users').delete().eq('id', userId);
+    if (error) console.error('Error deleting user:', error);
+    else set((state) => ({ users: state.users.filter(u => u.id !== userId) }));
+  },
 
-      /**
-       * Updates the user's data (e.g. for onboarding)
-       */
-      updateUser: (userId, updates) => set((state) => ({
-        users: state.users.map(u => 
-          u.id === userId 
-            ? { ...u, ...updates }
-            : u
-        )
-      })),
+  regeneratePassword: async (userId, newTempPassword) => {
+    const { data, error } = await supabase.from('users').update({ tempPassword: newTempPassword }).eq('id', userId).select().single();
+    if (error) console.error('Error regenerating pass:', error);
+    else set((state) => ({
+      users: state.users.map(u => u.id === userId ? data : u)
+    }));
+  },
 
-      /**
-       * Attempt to find a user by their credentials
-       */
-      findUserByCredentials: (login, password) => {
-        const { users } = get();
-        // Since it's a SPA prototype, we store tempPassword for the first login checks
-        return users.find(u => 
-          u.username.toLowerCase() === login.toLowerCase() && 
-          u.tempPassword === password
-        );
-      }
-    }),
-    {
-      name: 'alfasvk-users',
+  updateUser: async (userId, updates) => {
+    const { data, error } = await supabase.from('users').update(updates).eq('id', userId).select().single();
+    if (error) console.error('Error updating user:', error);
+    else set((state) => ({
+      users: state.users.map(u => u.id === userId ? data : u)
+    }));
+  },
+
+  findUserByCredentials: async (login, password) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .ilike('username', login) // case-insensitive
+      .eq('tempPassword', password)
+      .maybeSingle(); // maybeSingle so it doesn't throw if not found
+    
+    if (error) {
+      console.error('Auth error:', error);
+      return null;
     }
-  )
-);
+    return data;
+  }
+}));

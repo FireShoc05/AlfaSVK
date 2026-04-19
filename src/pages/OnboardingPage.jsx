@@ -17,7 +17,7 @@ export function OnboardingPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -48,9 +48,9 @@ export function OnboardingPage() {
     // Обновляем текущую сессию
     updateAuthUser(updates);
     
-    // Обновляем в локальной базе данных
+    // Обновляем в базе данных
     if (user.id !== 'admin_root') {
-      updateStoreUser(user.id, updates);
+      await updateStoreUser(user.id, updates);
     }
 
     // Перенаправляем на корень, а ProtectedRoute перебросит куда надо (обучение или работа)

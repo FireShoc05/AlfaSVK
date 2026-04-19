@@ -408,10 +408,10 @@ export function WizardContainer() {
   const user = useAuthStore((s) => s.user);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const json = generateMeetingJSON(store, user?.fullName || 'АДМИН');
     console.log('📦 Meeting JSON:', JSON.stringify(json, null, 2));
-    addMeeting(json, user?.id);
+    await addMeeting(json, user?.id);
     setShowSuccess(true);
   };
 
