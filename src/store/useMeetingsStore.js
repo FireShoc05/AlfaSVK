@@ -16,7 +16,7 @@ export const useMeetingsStore = create(
       getTodayMeetings: () => {
         const today = new Date().toISOString().split('T')[0];
         return (get().meetings || []).filter(
-          (m) => m?.meeting_timestamp?.startsWith(today)
+          (m) => m && m?.meeting_timestamp?.startsWith(today)
         );
       },
 
@@ -25,7 +25,7 @@ export const useMeetingsStore = create(
         const now = new Date();
         const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         return (get().meetings || []).filter(
-          (m) => m?.meeting_timestamp?.startsWith(yearMonth)
+          (m) => m && m?.meeting_timestamp?.startsWith(yearMonth)
         );
       },
 
@@ -70,13 +70,13 @@ export const useMeetingsStore = create(
       // Данные для лидерборда
       getLeaderboardData: () => {
         const meetings = get().meetings;
-        const totalEarned = meetings.reduce((sum, m) => sum + (m?.total_earned || 0), 0);
+        const totalEarned = (meetings || []).reduce((sum, m) => sum + (m?.total_earned || 0), 0);
 
         // Подсчёт БС и КЛ
         let bsCount = 0;
         let klCount = 0;
-        meetings.forEach((m) => {
-          (m.products || []).forEach((p) => {
+        (meetings || []).forEach((m) => {
+          (m?.products || []).forEach((p) => {
             if (p.type === 'service' && p.name === 'БС') bsCount++;
             if (p.type === 'service' && p.name === 'КЛ') klCount++;
           });
