@@ -2,7 +2,7 @@ import '../styles/profile.css';
 import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useMeetingsStore } from '../store/useMeetingsStore';
-import { GlassCard, Button, Modal, InputGroup, Badge } from '../components/ui';
+import { GlassCard, Button, Modal, InputGroup, Badge, Tabs } from '../components/ui';
 import { formatCurrency } from '../utils/formatters';
 import {
   User,
@@ -18,15 +18,17 @@ export function ProfilePage() {
   const user = useAuthStore((s) => s.user);
   const mStore = useMeetingsStore();
   
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [statsPeriod, setStatsPeriod] = useState('month');
+  
   const todayEarnings = mStore.getTodayEarnings();
   const monthEarnings = mStore.getMonthEarnings();
   const todayMeetings = mStore.getTodayMeetings();
   const monthMeetings = mStore.getMonthMeetings();
-  const productStats = mStore.getProductStats();
+  const productStats = mStore.getProductStats(statsPeriod);
   const chartData = mStore.getMonthlyChartData();
   const maxChart = Math.max(...chartData, 1);
 
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -100,6 +102,18 @@ export function ProfilePage() {
           ))}
         </div>
       </GlassCard>
+
+      {/* Detail Tables Filter */}
+      <div style={{ marginBottom: '16px' }}>
+        <Tabs 
+          tabs={[
+            { id: 'today', label: 'За сегодня' },
+            { id: 'month', label: 'За месяц' }
+          ]}
+          activeTab={statsPeriod}
+          onTabChange={setStatsPeriod}
+        />
+      </div>
 
       {/* Detail Tables */}
       <GlassCard>

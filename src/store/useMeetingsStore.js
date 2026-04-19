@@ -40,8 +40,14 @@ export const useMeetingsStore = create(
       },
 
       // Подсчёт продуктов для таблиц
-      getProductStats: () => {
-        const meetings = get().meetings || [];
+      getProductStats: (period = 'month') => {
+        let meetings = get().meetings || [];
+        if (period === 'today') {
+           meetings = get().getTodayMeetings();
+        } else if (period === 'month') {
+           meetings = get().getMonthMeetings();
+        }
+
         const mainStats = {};
         const crossStats = {};
 
