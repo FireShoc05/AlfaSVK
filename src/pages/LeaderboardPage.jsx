@@ -1,9 +1,9 @@
 import '../styles/leaderboard.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs } from '../components/ui';
 import { Trophy } from 'lucide-react';
 import { useMeetingsStore } from '../store/useMeetingsStore';
-import { useAuthStore } from '../store/useAuthStore';
+import { useUsersStore } from '../store/useUsersStore';
 import { formatCurrency } from '../utils/formatters';
 
 const tabs = [
@@ -13,29 +13,52 @@ const tabs = [
 ];
 
 const medals = ['🥇', '🥈', '🥉'];
-const medalClasses = ['gold', 'silver', 'bronze'];
+const medalClasses = ['leaderboard__item--gold', 'leaderboard__item--silver', 'leaderboard__item--bronze'];
 
 export function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState('earnings');
-  const user = useAuthStore((s) => s.user);
-  const mStore = useMeetingsStore();
-  const leaderData = mStore.getLeaderboardData(user?.id);
+  
+  const { fetchAllMeetings, getLeaderboardData } = useMeetingsStore();
+  const { users, fetchUsers } = useUsersStore();
 
-  const getValue = () => {
-    switch (activeTab) {
-      case 'earnings': return leaderData.earnings;
-      case 'bs': return leaderData.bsSales;
-      case 'kl': return leaderData.klSales;
-      default: return 0;
-    }
+  useEffect(() => {
+    fetchUsers();
+    fetchAllMeetings();
+  }, [fetchUsers, fetchAllMeetings]);
+
+  const getLeaderboardList = () => {
+    const list = users.map(u => {
+       const stats = getLeaderboardData(u.id);
+       return {
+          id: u.id,
+          name: u.fullName || u.username,
+          role: u.role,
+          earnings: stats.earnings,
+          bsSales: stats.bsSales,
+          klSales: stats.klSales
+       };
+    });
+    
+    return list.sort((a, b) => {
+       if (activeTab === 'earnings') return b.earnings - a.earnings;
+       if (activeTab === 'bs') return b.bsSales - a.bsSales;
+       if (activeTab === 'kl') return b.klSales - a.klSales;
+       return 0;
+    });
   };
+
+  const list = getLeaderboardList().filter(item => {
+      // Filter out admins if needed, or keep everyone who has > 0
+      if (activeTab === 'earnings') return item.earnings > 0;
+      if (activeTab === 'bs') return item.bsSales > 0;
+      if (activeTab === 'kl') return item.klSales > 0;
+      return false;
+  });
 
   const formatValue = (val) => {
     if (activeTab === 'earnings') return formatCurrency(val);
     return val;
   };
-
-  const value = getValue();
 
   return (
     <div className="leaderboard">
@@ -50,14 +73,18 @@ export function LeaderboardPage() {
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="leaderboard__list">
-        {value > 0 ? (
-          <div className={`leaderboard__item leaderboard__item--gold`}>
-            <div className="leaderboard__rank">
-              <span className="leaderboard__medal">{medals[0]}</span>
+        {list.length > 0 ? (
+          list.map((item, index) => (
+            <div key={item.id} className={`leaderboard__item ${index < 3 ? medalClasses[index] : ''}`}>
+              <div className="leaderboard__rank">
+                {index < 3 ? <span className="leaderboard__medal">{medals[index]}</span> : <span className="leaderboard__rank-num">#{index + 1}</span>}
+              </div>
+              <div className="leaderboard__name">{item.name}</div>
+              <div className="leaderboard__value">
+                {formatValue(activeTab === 'earnings' ? item.earnings : activeTab === 'bs' ? item.bsSales : item.klSales)}
+              </div>
             </div>
-            <div className="leaderboard__name">{user?.fullName || 'АДМИН'}</div>
-            <div className="leaderboard__value">{formatValue(value)}</div>
-          </div>
+          ))
         ) : (
           <div className="leaderboard__empty">
             <Trophy size={48} strokeWidth={1} />
