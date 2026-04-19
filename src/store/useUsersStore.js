@@ -18,6 +18,13 @@ export const useUsersStore = create(
       })),
 
       /**
+       * Deletes a user from the database
+       */
+      deleteUser: (userId) => set((state) => ({
+        users: state.users.filter(u => u.id !== userId)
+      })),
+
+      /**
        * Regenerates password for an existing user
        */
       regeneratePassword: (userId, newTempPassword) => set((state) => ({

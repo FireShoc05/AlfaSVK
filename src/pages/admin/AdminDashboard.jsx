@@ -1,19 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/useAuthStore';
-import { useUsersStore } from '../../store/useUsersStore';
-import { GlassCard, Button, InputGroup, Badge } from '../../components/ui';
-import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check } from 'lucide-react';
+import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2 } from 'lucide-react';
 import '../../styles/admin.css';
 
-// Utils to generate login and passwords
+// Утилиты для генерации
+const cyrillicToLatinMap = {
+  'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E', 'Ж': 'ZH',
+  'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O',
+  'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'KH', 'Ц': 'TS',
+  'Ч': 'CH', 'Ш': 'SH', 'Щ': 'SCH', 'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'YU', 'Я': 'YA'
+};
+
+const transliterateChar = (char) => cyrillicToLatinMap[char.toUpperCase()] || char.toUpperCase();
+
 const generateLogin = (fullName) => {
   if (!fullName) return '';
   const parts = fullName.trim().toUpperCase().split(/\s+/);
   let initials = '';
-  if (parts.length >= 1) initials += parts[0].charAt(0);
-  if (parts.length >= 2) initials += parts[1].charAt(0);
-  if (parts.length >= 3) initials += parts[2].charAt(0);
+  if (parts.length >= 1) initials += transliterateChar(parts[0].charAt(0));
+  if (parts.length >= 2) initials += transliterateChar(parts[1].charAt(0));
+  if (parts.length >= 3) initials += transliterateChar(parts[2].charAt(0));
   
   // Example: SVK-IVN-492104
   const randomCode = Math.floor(100000 + Math.random() * 900000);
@@ -31,7 +37,7 @@ const generatePassword = () => {
 
 export function AdminDashboard() {
   const { logout } = useAuthStore();
-  const { users, addUser, regeneratePassword, updateUser } = useUsersStore();
+  const { users, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
@@ -74,6 +80,12 @@ export function AdminDashboard() {
     if (window.confirm(`Изменить права пользователя ${userObj.fullName}?`)) {
       const newRole = userObj.role === 'admin' ? 'agent' : 'admin';
       updateUser(userObj.id, { role: newRole });
+    }
+  };
+
+  const handleDelete = (userObj) => {
+    if (window.confirm(`Вы уверены, что хотите безвозвратно удалить сотрудника: ${userObj.fullName}?`)) {
+      deleteUser(userObj.id);
     }
   };
 
@@ -193,6 +205,9 @@ export function AdminDashboard() {
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleRegenerate(u.id)}>
                           <KeyRound size={14} /> Пароль
+                        </Button>
+                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(u)}>
+                          <Trash2 size={14} /> 
                         </Button>
                       </td>
                     </tr>
