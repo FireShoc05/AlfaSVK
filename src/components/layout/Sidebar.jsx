@@ -63,7 +63,9 @@ export function Sidebar() {
       <div className="sidebar__section">
         <div className="sidebar__section-title">Дополнительно</div>
         <nav className="sidebar__nav">
-          {secondaryNav.map(({ to, icon: Icon, label }) => (
+          {secondaryNav
+            .filter(({ to }) => to !== '/admin' || user?.role === 'admin')
+            .map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
