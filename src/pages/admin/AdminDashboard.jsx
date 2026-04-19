@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2 } from 'lucide-react';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useUsersStore } from '../../store/useUsersStore';
+import { GlassCard, Button, InputGroup, Badge } from '../../components/ui';
 import '../../styles/admin.css';
 
 // Утилиты для генерации
