@@ -195,9 +195,18 @@ export function AdminDashboard() {
                         </Badge>
                       </td>
                       <td>
-                        <Badge variant={u.status === 'На обучении' ? 'warning' : 'success'}>
-                          {u.status}
-                        </Badge>
+                        <button 
+                          className="status-toggle-btn"
+                          onClick={() => {
+                            const newStatus = u.status === 'На обучении' ? 'Действующий сотрудник' : 'На обучении';
+                            updateUser(u.id, { status: newStatus });
+                          }}
+                          title="Нажмите для смены статуса"
+                        >
+                          <Badge variant={u.status === 'На обучении' ? 'warning' : 'success'}>
+                            {u.status}
+                          </Badge>
+                        </button>
                       </td>
                       <td>
                         {u.onboarded ? '✅ Да' : '⏳ Нет'}

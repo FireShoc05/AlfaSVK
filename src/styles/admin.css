@@ -112,3 +112,17 @@
   background: rgba(255, 255, 255, 0.1);
   color: white;
 }
+
+.status-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+}
+
+.status-toggle-btn:hover {
+  transform: scale(1.08);
+  filter: brightness(1.2);
+}
