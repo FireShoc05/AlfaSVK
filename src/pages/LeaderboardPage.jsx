@@ -19,7 +19,7 @@ export function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState('earnings');
   const user = useAuthStore((s) => s.user);
   const mStore = useMeetingsStore();
-  const leaderData = mStore.getLeaderboardData();
+  const leaderData = mStore.getLeaderboardData(user?.id);
 
   const getValue = () => {
     switch (activeTab) {

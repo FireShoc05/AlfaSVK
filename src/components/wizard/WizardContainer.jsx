@@ -411,7 +411,7 @@ export function WizardContainer() {
   const handleComplete = () => {
     const json = generateMeetingJSON(store, user?.fullName || 'АДМИН');
     console.log('📦 Meeting JSON:', JSON.stringify(json, null, 2));
-    addMeeting(json);
+    addMeeting(json, user?.id);
     setShowSuccess(true);
   };
 

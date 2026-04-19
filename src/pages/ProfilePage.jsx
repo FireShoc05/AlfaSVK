@@ -24,12 +24,13 @@ export function ProfilePage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [statsPeriod, setStatsPeriod] = useState('month');
   
-  const todayEarnings = mStore.getTodayEarnings();
-  const monthEarnings = mStore.getMonthEarnings();
-  const todayMeetings = mStore.getTodayMeetings();
-  const monthMeetings = mStore.getMonthMeetings();
-  const productStats = mStore.getProductStats(statsPeriod);
-  const chartData = mStore.getMonthlyChartData();
+  const userId = user?.id;
+  const todayEarnings = mStore.getTodayEarnings(userId);
+  const monthEarnings = mStore.getMonthEarnings(userId);
+  const todayMeetings = mStore.getTodayMeetings(userId);
+  const monthMeetings = mStore.getMonthMeetings(userId);
+  const productStats = mStore.getProductStats(statsPeriod, userId);
+  const chartData = mStore.getMonthlyChartData(userId);
   const maxChart = Math.max(...chartData, 1);
 
   const [oldPassword, setOldPassword] = useState('');
