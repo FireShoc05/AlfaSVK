@@ -1,0 +1,99 @@
+/* ============================================
+   Leaderboard Styles
+   ============================================ */
+
+.leaderboard {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.leaderboard__list {
+  margin-top: var(--space-lg);
+}
+
+.leaderboard__item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-sm);
+  transition: all var(--transition-base);
+}
+
+.leaderboard__item:hover {
+  background: var(--glass-bg-hover);
+  transform: translateX(4px);
+}
+
+.leaderboard__item--gold {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px var(--gold-glow), inset 0 0 20px rgba(255, 215, 0, 0.05);
+}
+
+.leaderboard__item--silver {
+  border-color: var(--silver);
+  box-shadow: 0 0 16px var(--silver-glow);
+}
+
+.leaderboard__item--bronze {
+  border-color: var(--bronze);
+  box-shadow: 0 0 16px var(--bronze-glow);
+}
+
+.leaderboard__rank {
+  width: 40px;
+  min-width: 40px;
+  text-align: center;
+  margin-right: var(--space-md);
+}
+
+.leaderboard__medal {
+  font-size: 1.5rem;
+}
+
+.leaderboard__rank-num {
+  font-size: var(--font-base);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.leaderboard__name {
+  flex: 1;
+  font-size: var(--font-base);
+  font-weight: 600;
+}
+
+.leaderboard__value {
+  font-size: var(--font-base);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.leaderboard__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--text-tertiary);
+  gap: var(--space-md);
+}
+
+.leaderboard__empty svg {
+  opacity: 0.3;
+}
+
+.leaderboard__empty p {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.leaderboard__empty-hint {
+  font-size: var(--font-sm) !important;
+  font-weight: 400 !important;
+  color: var(--text-tertiary) !important;
+}
