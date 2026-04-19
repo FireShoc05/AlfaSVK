@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 
 /**
@@ -48,5 +48,5 @@ export function ProtectedRoute({ children, allowedRoles }) {
     }
   }
 
-  return children;
+  return children ? children : <Outlet />;
 }
