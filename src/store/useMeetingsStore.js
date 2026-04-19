@@ -141,6 +141,24 @@ export const useMeetingsStore = create((set, get) => ({
     };
   },
 
+  getMonthlyChartData: (userId) => {
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const dailyData = Array(daysInMonth).fill(0);
+    get()._getUserMeetings(userId)
+      .filter((m) => m?.meeting_timestamp?.startsWith(yearMonth))
+      .forEach((m) => {
+        const day = new Date(m.meeting_timestamp).getDate() - 1;
+        if (!isNaN(day)) {
+          dailyData[day] += (Number(m.total_earned) || 0);
+        }
+      });
+
+    return dailyData;
+  },
+
   clearAll: (userId) => {
     if (userId) {
       set((s) => ({
