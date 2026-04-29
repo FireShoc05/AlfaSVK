@@ -32,7 +32,7 @@ export default function App() {
 
         {/* Основной интерфейс */}
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Navigate to="/meeting" replace />} />
+          <Route path="/" element={<Navigate to="/leaderboard" replace />} />
           <Route path="/meeting" element={<MeetingPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
