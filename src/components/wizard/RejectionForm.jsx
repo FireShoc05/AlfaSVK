@@ -43,17 +43,29 @@ export function RejectionForm({ onBack }) {
   const needsTransferDate = type === 'Перенос';
   const reasonOptions = type === 'Перенос' ? TRANSFER_REASONS : type === 'Отказ' ? REFUSAL_REASONS : [];
 
+  // Format date input with auto-dots: dd.mm.yyyy
+  const handleDateInput = (rawValue) => {
+    // Strip non-digits
+    const digits = rawValue.replace(/\D/g, '').slice(0, 8);
+    let formatted = '';
+    if (digits.length > 0) formatted += digits.slice(0, 2);
+    if (digits.length > 2) formatted += '.' + digits.slice(2, 4);
+    if (digits.length > 4) formatted += '.' + digits.slice(4, 8);
+    setTransferDate(formatted);
+  };
+
   // Validate transfer date is in the future
   const isTransferDateValid = () => {
     if (!needsTransferDate) return true;
     if (!transferDate) return false;
     const parts = transferDate.split('.');
     if (parts.length !== 3) return false;
-    const [dd, mm, yy] = parts.map(Number);
-    if (!dd || !mm || !yy) return false;
-    const fullYear = yy < 100 ? 2000 + yy : yy;
-    const date = new Date(fullYear, mm - 1, dd);
+    const [dd, mm, yyyy] = parts.map(Number);
+    if (!dd || !mm || !yyyy || String(yyyy).length !== 4) return false;
+    const date = new Date(yyyy, mm - 1, dd);
     if (isNaN(date.getTime())) return false;
+    // Verify the date components match (catches invalid dates like 32.13.2026)
+    if (date.getDate() !== dd || date.getMonth() !== mm - 1) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date >= today;
@@ -170,13 +182,14 @@ export function RejectionForm({ onBack }) {
             <input
               type="text"
               className="rejection-field__input"
-              placeholder="дд.мм.гг"
+              placeholder="дд.мм.гггг"
               value={transferDate}
-              onChange={(e) => setTransferDate(e.target.value)}
-              maxLength={8}
+              onChange={(e) => handleDateInput(e.target.value)}
+              maxLength={10}
+              inputMode="numeric"
             />
             {transferDate && !isTransferDateValid() && (
-              <span className="rejection-field__error">Введите корректную дату в будущем (дд.мм.гг)</span>
+              <span className="rejection-field__error">Введите корректную дату в будущем (дд.мм.гггг)</span>
             )}
           </div>
         )}

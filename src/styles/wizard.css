@@ -798,3 +798,113 @@
   box-shadow: 0 0 0 1px var(--accent);
 }
 
+/* ============================================
+   Links Page
+   ============================================ */
+
+.links-page {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.links-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl);
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+}
+
+.links-page__section {
+  margin-bottom: var(--space-md);
+}
+
+.links-page__grid {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.links-page__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+.links-page__card--quick {
+  padding: 14px 24px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  color: white;
+  font-weight: 800;
+  font-size: var(--font-sm);
+  letter-spacing: 0.5px;
+  gap: var(--space-sm);
+}
+
+.links-page__card--quick:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 6px 24px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.links-page__card-badge {
+  font-weight: 800;
+}
+
+.links-page__card-arrow {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.links-page__divider {
+  height: 1px;
+  background: var(--glass-border);
+  margin: var(--space-lg) 0;
+}
+
+.links-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.links-page__card--custom {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  justify-content: space-between;
+}
+
+.links-page__card--custom:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.links-page__card-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.links-page__card-title {
+  font-size: var(--font-base);
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.links-page__card-desc {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}

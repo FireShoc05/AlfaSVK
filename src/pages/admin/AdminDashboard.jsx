@@ -44,7 +44,7 @@ export function AdminDashboard() {
   const { logout } = useAuthStore();
   const { users, fetchUsers, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
   const { rejections, fetchRejections } = useRejectionsStore();
-  const { links, fetchLinks, saveLinks } = useSettingsStore();
+  const { links, customLinks, fetchLinks, saveLinks, saveCustomLinks } = useSettingsStore();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('users');
@@ -52,8 +52,13 @@ export function AdminDashboard() {
   // Links tab state
   const [linkMaxUrl, setLinkMaxUrl] = useState('');
   const [linkSfagoUrl, setLinkSfagoUrl] = useState('');
+  const [customLinksLocal, setCustomLinksLocal] = useState([]);
   const [linksSaving, setLinksSaving] = useState(false);
   const [linksSaved, setLinksSaved] = useState(false);
+  const [showAddLink, setShowAddLink] = useState(false);
+  const [newLinkTitle, setNewLinkTitle] = useState('');
+  const [newLinkDesc, setNewLinkDesc] = useState('');
+  const [newLinkUrl, setNewLinkUrl] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -66,6 +71,10 @@ export function AdminDashboard() {
     setLinkMaxUrl(links.max_url || '');
     setLinkSfagoUrl(links.sfago_url || '');
   }, [links]);
+
+  useEffect(() => {
+    setCustomLinksLocal(customLinks || []);
+  }, [customLinks]);
 
   const [fullName, setFullName] = useState('');
   const [status, setStatus] = useState('Действующий сотрудник');
@@ -350,10 +359,11 @@ export function AdminDashboard() {
               <Link2 size={18} /> Управление ссылками
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', marginBottom: 'var(--space-lg)' }}>
-              Укажите URL для быстрых ссылок в боковом меню. Оставьте пустым, чтобы скрыть кнопку.
+              Ссылки MAX и SFAGo отображаются как кнопки в сайдбаре. Оставьте пустым, чтобы скрыть.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+            {/* Permanent quick links */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               <div className="admin-link-row">
                 <div className="admin-link-row__label">
                   <span className="admin-link-badge">MAX</span>
@@ -381,18 +391,106 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            <div style={{ marginTop: 'var(--space-xl)' }}>
+            {/* Divider */}
+            <div className="admin-link-divider">
+              <span>Полезные ссылки для сотрудников</span>
+            </div>
+
+            {/* Custom links list */}
+            {customLinksLocal.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+                {customLinksLocal.map((cl, i) => (
+                  <div key={i} className="admin-custom-link">
+                    <div className="admin-custom-link__info">
+                      <div className="admin-custom-link__title">{cl.title}</div>
+                      {cl.description && <div className="admin-custom-link__desc">{cl.description}</div>}
+                      <div className="admin-custom-link__url">{cl.url}</div>
+                    </div>
+                    <Button variant="outline-danger" size="sm" onClick={() => {
+                      setCustomLinksLocal(customLinksLocal.filter((_, idx) => idx !== i));
+                      setLinksSaved(false);
+                    }}>
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add new link form */}
+            {showAddLink ? (
+              <div className="admin-add-link-form">
+                <input
+                  type="text"
+                  className="admin-link-row__input"
+                  placeholder="Название"
+                  value={newLinkTitle}
+                  onChange={(e) => setNewLinkTitle(e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="admin-link-row__input"
+                  placeholder="Краткое описание (необязательно)"
+                  value={newLinkDesc}
+                  onChange={(e) => setNewLinkDesc(e.target.value)}
+                />
+                <input
+                  type="url"
+                  className="admin-link-row__input"
+                  placeholder="https://..."
+                  value={newLinkUrl}
+                  onChange={(e) => setNewLinkUrl(e.target.value)}
+                />
+                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    disabled={!newLinkTitle.trim() || !newLinkUrl.trim()}
+                    onClick={() => {
+                      setCustomLinksLocal([...customLinksLocal, {
+                        title: newLinkTitle.trim(),
+                        description: newLinkDesc.trim(),
+                        url: newLinkUrl.trim(),
+                      }]);
+                      setNewLinkTitle('');
+                      setNewLinkDesc('');
+                      setNewLinkUrl('');
+                      setShowAddLink(false);
+                      setLinksSaved(false);
+                    }}
+                  >
+                    <Check size={14} /> Добавить
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setShowAddLink(false);
+                    setNewLinkTitle('');
+                    setNewLinkDesc('');
+                    setNewLinkUrl('');
+                  }}>
+                    Отмена
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setShowAddLink(true)} style={{ marginBottom: 'var(--space-lg)' }}>
+                + Добавить ссылку
+              </Button>
+            )}
+
+            {/* Save all button */}
+            <div>
               <Button
                 variant={linksSaved ? 'success' : 'primary'}
                 disabled={linksSaving}
                 onClick={async () => {
                   setLinksSaving(true);
-                  const ok = await saveLinks({ max_url: linkMaxUrl.trim(), sfago_url: linkSfagoUrl.trim() });
+                  const ok1 = await saveLinks({ max_url: linkMaxUrl.trim(), sfago_url: linkSfagoUrl.trim() });
+                  const ok2 = await saveCustomLinks(customLinksLocal);
                   setLinksSaving(false);
-                  if (ok) setLinksSaved(true);
+                  if (ok1 && ok2) setLinksSaved(true);
                 }}
               >
-                {linksSaved ? <><Check size={16} /> Сохранено</> : <><Save size={16} /> {linksSaving ? 'Сохранение...' : 'Сохранить'}</>}
+                {linksSaved ? <><Check size={16} /> Сохранено</> : <><Save size={16} /> {linksSaving ? 'Сохранение...' : 'Сохранить всё'}</>}
               </Button>
             </div>
           </GlassCard>

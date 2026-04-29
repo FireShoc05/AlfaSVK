@@ -8,24 +8,33 @@ const DEFAULT_LINKS = {
 
 export const useSettingsStore = create((set, get) => ({
   links: { ...DEFAULT_LINKS },
+  customLinks: [],
   loaded: false,
 
   fetchLinks: async () => {
-    const { data, error } = await supabase
+    // Fetch quick links
+    const { data: qlData, error: qlError } = await supabase
       .from('settings')
       .select('*')
       .eq('key', 'quick_links')
       .maybeSingle();
 
-    if (error) {
-      console.error('Error fetching settings:', error);
-    }
-    
-    if (data?.value) {
-      set({ links: { ...DEFAULT_LINKS, ...data.value }, loaded: true });
-    } else {
-      set({ loaded: true });
-    }
+    if (qlError) console.error('Error fetching quick_links:', qlError);
+
+    // Fetch custom links
+    const { data: clData, error: clError } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('key', 'custom_links')
+      .maybeSingle();
+
+    if (clError) console.error('Error fetching custom_links:', clError);
+
+    set({
+      links: qlData?.value ? { ...DEFAULT_LINKS, ...qlData.value } : { ...DEFAULT_LINKS },
+      customLinks: clData?.value || [],
+      loaded: true,
+    });
   },
 
   saveLinks: async (newLinks) => {
@@ -48,11 +57,39 @@ export const useSettingsStore = create((set, get) => ({
     }
 
     if (error) {
-      console.error('Error saving settings:', error);
+      console.error('Error saving quick_links:', error);
       return false;
     }
 
     set({ links: newLinks });
+    return true;
+  },
+
+  saveCustomLinks: async (newCustomLinks) => {
+    const { data: existing } = await supabase
+      .from('settings')
+      .select('id')
+      .eq('key', 'custom_links')
+      .maybeSingle();
+
+    let error;
+    if (existing) {
+      ({ error } = await supabase
+        .from('settings')
+        .update({ value: newCustomLinks })
+        .eq('key', 'custom_links'));
+    } else {
+      ({ error } = await supabase
+        .from('settings')
+        .insert([{ key: 'custom_links', value: newCustomLinks }]));
+    }
+
+    if (error) {
+      console.error('Error saving custom_links:', error);
+      return false;
+    }
+
+    set({ customLinks: newCustomLinks });
     return true;
   },
 }));

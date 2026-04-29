@@ -9,6 +9,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { MeetingPage } from './pages/MeetingPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { LinksPage } from './pages/LinksPage';
 import { PlaceholderPages } from './pages/PlaceholderPages';
 
 export default function App() {
@@ -36,7 +37,7 @@ export default function App() {
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           
-          <Route path="/passwords" element={<PlaceholderPages type="passwords" />} />
+          <Route path="/links" element={<LinksPage />} />
           <Route path="/pending" element={<PlaceholderPages type="pending" />} />
         </Route>
       </Route>

@@ -4,7 +4,7 @@ import {
   CalendarPlus,
   Trophy,
   User,
-  KeyRound,
+  Link,
   Shield,
   LogOut,
   Menu,
@@ -21,7 +21,7 @@ const mainNav = [
 ];
 
 const secondaryNav = [
-  { to: '/passwords', icon: KeyRound, label: 'Логины и пароли' },
+  { to: '/links', icon: Link, label: 'Полезные ссылки' },
   { to: '/admin', icon: Shield, label: 'Админ панель' },
 ];
 
