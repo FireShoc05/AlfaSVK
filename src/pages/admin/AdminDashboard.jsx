@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2 } from 'lucide-react';
+import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2, FileX, Link2, Save } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useUsersStore } from '../../store/useUsersStore';
+import { useRejectionsStore } from '../../store/useRejectionsStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 import { GlassCard, Button, InputGroup, Badge } from '../../components/ui';
 import '../../styles/admin.css';
 
@@ -41,11 +43,29 @@ const generatePassword = () => {
 export function AdminDashboard() {
   const { logout } = useAuthStore();
   const { users, fetchUsers, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
+  const { rejections, fetchRejections } = useRejectionsStore();
+  const { links, fetchLinks, saveLinks } = useSettingsStore();
   const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState('users');
+
+  // Links tab state
+  const [linkMaxUrl, setLinkMaxUrl] = useState('');
+  const [linkSfagoUrl, setLinkSfagoUrl] = useState('');
+  const [linksSaving, setLinksSaving] = useState(false);
+  const [linksSaved, setLinksSaved] = useState(false);
 
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+    fetchRejections();
+    fetchLinks();
+  }, [fetchUsers, fetchRejections, fetchLinks]);
+
+  // Sync link inputs when settings load
+  useEffect(() => {
+    setLinkMaxUrl(links.max_url || '');
+    setLinkSfagoUrl(links.sfago_url || '');
+  }, [links]);
 
   const [fullName, setFullName] = useState('');
   const [status, setStatus] = useState('Действующий сотрудник');
@@ -118,7 +138,31 @@ export function AdminDashboard() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="admin-tabs">
+        <button
+          className={`admin-tabs__tab ${activeTab === 'users' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          <UserPlus size={16} /> Сотрудники
+        </button>
+        <button
+          className={`admin-tabs__tab ${activeTab === 'rejections' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('rejections')}
+        >
+          <FileX size={16} /> Отказы, НДЗ, переносы
+        </button>
+        <button
+          className={`admin-tabs__tab ${activeTab === 'links' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('links')}
+        >
+          <Link2 size={16} /> Ссылки
+        </button>
+      </div>
+
       <div className="admin-content">
+        {activeTab === 'users' && (
+        <>
         {/* ADD USER FORM */}
         <GlassCard className="admin-card">
           <h3 className="admin-card__title">
@@ -239,6 +283,120 @@ export function AdminDashboard() {
             </div>
           )}
         </GlassCard>
+        </>
+        )}
+
+        {/* REJECTIONS TAB */}
+        {activeTab === 'rejections' && (
+          <GlassCard className="admin-card">
+            <h3 className="admin-card__title">
+              <FileX size={18} /> Отказы, НДЗ, переносы ({rejections.length})
+            </h3>
+
+            {rejections.length === 0 ? (
+              <div className="admin-empty">Нет записей</div>
+            ) : (
+              <div className="admin-table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Сотрудник</th>
+                      <th>ID встречи</th>
+                      <th>Вид</th>
+                      <th>Причина</th>
+                      <th>День переноса</th>
+                      <th>Комментарий</th>
+                      <th>Дата</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rejections.map((r) => (
+                      <tr key={r.id}>
+                        <td><strong>{r.users?.fullName || '—'}</strong></td>
+                        <td className="monospace-cell">{r.meetingId}</td>
+                        <td>
+                          <Badge variant={
+                            r.type === 'НДЗ' ? 'warning' :
+                            r.type === 'Перенос' ? 'primary' : 'danger'
+                          }>
+                            {r.type}
+                          </Badge>
+                        </td>
+                        <td style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                          {r.reason || '—'}
+                        </td>
+                        <td style={{ fontSize: '0.85em' }}>
+                          {r.transferDate || '—'}
+                        </td>
+                        <td style={{ fontSize: '0.85em', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {r.comment || '—'}
+                        </td>
+                        <td style={{ fontSize: '0.85em', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+                          {r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassCard>
+        )}
+
+        {/* LINKS TAB */}
+        {activeTab === 'links' && (
+          <GlassCard className="admin-card">
+            <h3 className="admin-card__title">
+              <Link2 size={18} /> Управление ссылками
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', marginBottom: 'var(--space-lg)' }}>
+              Укажите URL для быстрых ссылок в боковом меню. Оставьте пустым, чтобы скрыть кнопку.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+              <div className="admin-link-row">
+                <div className="admin-link-row__label">
+                  <span className="admin-link-badge">MAX</span>
+                </div>
+                <input
+                  type="url"
+                  className="admin-link-row__input"
+                  placeholder="https://..."
+                  value={linkMaxUrl}
+                  onChange={(e) => { setLinkMaxUrl(e.target.value); setLinksSaved(false); }}
+                />
+              </div>
+
+              <div className="admin-link-row">
+                <div className="admin-link-row__label">
+                  <span className="admin-link-badge">SFAGo</span>
+                </div>
+                <input
+                  type="url"
+                  className="admin-link-row__input"
+                  placeholder="https://..."
+                  value={linkSfagoUrl}
+                  onChange={(e) => { setLinkSfagoUrl(e.target.value); setLinksSaved(false); }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 'var(--space-xl)' }}>
+              <Button
+                variant={linksSaved ? 'success' : 'primary'}
+                disabled={linksSaving}
+                onClick={async () => {
+                  setLinksSaving(true);
+                  const ok = await saveLinks({ max_url: linkMaxUrl.trim(), sfago_url: linkSfagoUrl.trim() });
+                  setLinksSaving(false);
+                  if (ok) setLinksSaved(true);
+                }}
+              >
+                {linksSaved ? <><Check size={16} /> Сохранено</> : <><Save size={16} /> {linksSaving ? 'Сохранение...' : 'Сохранить'}</>}
+              </Button>
+            </div>
+          </GlassCard>
+        )}
       </div>
     </div>
   );

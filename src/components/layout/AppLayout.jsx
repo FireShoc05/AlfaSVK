@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-import { BottomNav } from './BottomNav';
 import { ErrorBoundary } from '../ErrorBoundary';
 import '../../styles/layout.css';
 
@@ -26,7 +25,6 @@ export function AppLayout() {
           <Outlet />
         </ErrorBoundary>
       </main>
-      <BottomNav />
     </div>
   );
 }

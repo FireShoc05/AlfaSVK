@@ -1,5 +1,5 @@
 import { PlaceholderPage } from '../components/ui';
-import { KeyRound, ArrowRightLeft, Shield, Clock } from 'lucide-react';
+import { KeyRound, Shield, Clock } from 'lucide-react';
 
 const pages = {
   passwords: {
@@ -7,11 +7,7 @@ const pages = {
     title: 'Логины и пароли',
     description: 'Раздел находится в разработке. Здесь будет безопасное хранилище учётных данных.',
   },
-  transfers: {
-    icon: <ArrowRightLeft size={32} />,
-    title: 'Бот переносов',
-    description: 'Раздел находится в разработке. Здесь будет автоматизация переноса встреч.',
-  },
+
   admin: {
     icon: <Shield size={32} />,
     title: 'Админ панель',

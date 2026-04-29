@@ -11,7 +11,7 @@ export function formatCurrency(amount) {
 /**
  * Генерирует JSON встречи для отправки на бэкенд
  */
-export function generateMeetingJSON(wizardState, agentName) {
+export function generateMeetingJSON(wizardState, agentName, meetingId) {
   const products = [];
 
   // Main products
@@ -115,6 +115,7 @@ export function generateMeetingJSON(wizardState, agentName) {
   const totalEarned = products.reduce((sum, p) => sum + p.earned, 0);
 
   return {
+    meetingId: meetingId || null,
     agent_name: agentName,
     meeting_timestamp: new Date().toISOString(),
     total_earned: totalEarned,

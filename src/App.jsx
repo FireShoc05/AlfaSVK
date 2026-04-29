@@ -37,7 +37,6 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           
           <Route path="/passwords" element={<PlaceholderPages type="passwords" />} />
-          <Route path="/transfers" element={<PlaceholderPages type="transfers" />} />
           <Route path="/pending" element={<PlaceholderPages type="pending" />} />
         </Route>
       </Route>

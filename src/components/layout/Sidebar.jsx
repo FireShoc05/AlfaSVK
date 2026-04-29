@@ -1,14 +1,18 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   CalendarPlus,
   Trophy,
   User,
   KeyRound,
-  ArrowRightLeft,
   Shield,
   LogOut,
+  Menu,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 
 const mainNav = [
   { to: '/meeting', icon: CalendarPlus, label: 'Новая встреча' },
@@ -18,22 +22,40 @@ const mainNav = [
 
 const secondaryNav = [
   { to: '/passwords', icon: KeyRound, label: 'Логины и пароли' },
-  { to: '/transfers', icon: ArrowRightLeft, label: 'Бот переносов' },
   { to: '/admin', icon: Shield, label: 'Админ панель' },
 ];
 
 export function Sidebar() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const links = useSettingsStore((s) => s.links);
+  const fetchLinks = useSettingsStore((s) => s.fetchLinks);
+  const loaded = useSettingsStore((s) => s.loaded);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!loaded) fetchLinks();
+  }, [loaded, fetchLinks]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  return (
-    <aside className="sidebar">
+  const quickLinks = [
+    { label: 'MAX', url: links.max_url },
+    { label: 'SFAGo', url: links.sfago_url },
+  ].filter(l => l.url);
+
+  const sidebarContent = (
+    <>
       <div className="sidebar__logo">
         <div className="sidebar__logo-icon">A</div>
         <div>
@@ -41,6 +63,24 @@ export function Sidebar() {
           <div className="sidebar__logo-sub">Платформа агента</div>
         </div>
       </div>
+
+      {/* Quick Links */}
+      {quickLinks.length > 0 && (
+        <div className="sidebar__quick-links">
+          {quickLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sidebar__quick-link"
+            >
+              <span className="sidebar__quick-link-label">{link.label}</span>
+              <ExternalLink size={12} />
+            </a>
+          ))}
+        </div>
+      )}
 
       <div className="sidebar__section">
         <div className="sidebar__section-title">Основное</div>
@@ -96,6 +136,41 @@ export function Sidebar() {
           </button>
         </div>
       )}
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="sidebar sidebar--desktop">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile hamburger button */}
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Открыть меню"
+      >
+        <Menu size={24} />
+      </button>
+
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div className="mobile-overlay" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Mobile drawer */}
+      <aside className={`sidebar sidebar--mobile ${mobileOpen ? 'sidebar--mobile-open' : ''}`}>
+        <button
+          className="sidebar__close-btn"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Закрыть меню"
+        >
+          <X size={24} />
+        </button>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

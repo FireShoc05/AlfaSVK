@@ -400,16 +400,17 @@ function Step4({ onComplete, onDelete }) {
 }
 
 /* ─── Wizard Container ─────────────────────── */
-export function WizardContainer() {
+export function WizardContainer({ onBack }) {
   const store = useWizardStore();
   const { currentStep, nextStep, prevStep, resetWizard } = store;
   const total = calculateTotal(store);
   const addMeeting = useMeetingsStore((s) => s.addMeeting);
   const user = useAuthStore((s) => s.user);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [meetingId, setMeetingId] = useState('');
 
   const handleComplete = async () => {
-    const json = generateMeetingJSON(store, user?.fullName || 'АДМИН');
+    const json = generateMeetingJSON(store, user?.fullName || 'АДМИН', meetingId.trim());
     console.log('📦 Meeting JSON:', JSON.stringify(json, null, 2));
     await addMeeting(json, user?.id);
     setShowSuccess(true);
@@ -422,13 +423,33 @@ export function WizardContainer() {
   const handleSuccessClose = () => {
     setShowSuccess(false);
     resetWizard();
+    setMeetingId('');
+    if (onBack) onBack();
   };
 
   return (
     <div className="wizard">
       <div className="page-header">
-        <h1 className="page-header__title">Новая встреча</h1>
+        <h1 className="page-header__title">Успешная встреча</h1>
         <p className="page-header__subtitle">Заполните данные о продажах</p>
+      </div>
+
+      {onBack && (
+        <button className="rejection-back-btn" onClick={onBack} style={{ marginBottom: '12px' }}>
+          <ChevronLeft size={18} /> Назад к выбору
+        </button>
+      )}
+
+      {/* Meeting ID field */}
+      <div className="wizard-meeting-id">
+        <label className="wizard-meeting-id__label">ID встречи</label>
+        <input
+          type="text"
+          className="wizard-meeting-id__input"
+          placeholder="Введите ID встречи"
+          value={meetingId}
+          onChange={(e) => setMeetingId(e.target.value)}
+        />
       </div>
 
       <StepIndicator current={currentStep} />
@@ -446,7 +467,7 @@ export function WizardContainer() {
               <ChevronLeft size={16} /> Назад
             </Button>
           )}
-          <Button variant="primary" block onClick={nextStep}>
+          <Button variant="primary" block onClick={nextStep} disabled={!meetingId.trim()}>
             Далее <ChevronRight size={16} />
           </Button>
         </div>

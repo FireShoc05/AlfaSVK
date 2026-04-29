@@ -468,3 +468,333 @@
   font-weight: 800;
   color: var(--success);
 }
+
+/* ============================================
+   Meeting Choice Screen
+   ============================================ */
+
+.meeting-choice {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.meeting-choice__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+@media (max-width: 520px) {
+  .meeting-choice__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+.meeting-choice__card {
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl) var(--space-xl);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.meeting-choice__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.meeting-choice__card--success::before {
+  background: radial-gradient(ellipse at center, rgba(52, 211, 153, 0.08) 0%, transparent 70%);
+}
+
+.meeting-choice__card--fail::before {
+  background: radial-gradient(ellipse at center, rgba(248, 113, 113, 0.08) 0%, transparent 70%);
+}
+
+.meeting-choice__card:hover::before {
+  opacity: 1;
+}
+
+.meeting-choice__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.meeting-choice__card--success:hover {
+  border-color: var(--success);
+  box-shadow: 0 0 0 1px var(--success), 0 12px 40px rgba(52, 211, 153, 0.15);
+}
+
+.meeting-choice__card--fail:hover {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger), 0 12px 40px rgba(248, 113, 113, 0.15);
+}
+
+.meeting-choice__icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.meeting-choice__card--success .meeting-choice__icon {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--success);
+}
+
+.meeting-choice__card--fail .meeting-choice__icon {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--danger);
+}
+
+.meeting-choice__card--success:hover .meeting-choice__icon {
+  background: rgba(52, 211, 153, 0.2);
+  box-shadow: 0 0 24px rgba(52, 211, 153, 0.2);
+}
+
+.meeting-choice__card--fail:hover .meeting-choice__icon {
+  background: rgba(248, 113, 113, 0.2);
+  box-shadow: 0 0 24px rgba(248, 113, 113, 0.2);
+}
+
+.meeting-choice__title {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.meeting-choice__desc {
+  font-size: var(--font-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ============================================
+   Wizard Meeting ID Field
+   ============================================ */
+
+.wizard-meeting-id {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.wizard-meeting-id__label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.wizard-meeting-id__input {
+  flex: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  transition: border-color var(--transition-base);
+}
+
+.wizard-meeting-id__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.wizard-meeting-id__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* ============================================
+   Rejection Form
+   ============================================ */
+
+.rejection-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  cursor: pointer;
+  padding: var(--space-xs) 0;
+  margin-bottom: var(--space-md);
+  transition: color var(--transition-base);
+}
+
+.rejection-back-btn:hover {
+  color: var(--accent);
+}
+
+.rejection-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.rejection-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.rejection-field__label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.rejection-field__optional {
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+.rejection-field__input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: var(--font-base);
+  font-family: inherit;
+  transition: border-color var(--transition-base);
+}
+
+.rejection-field__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.rejection-field__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.rejection-field__textarea {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: var(--font-base);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-base);
+}
+
+.rejection-field__textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.rejection-field__textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.rejection-field__error {
+  font-size: var(--font-xs);
+  color: var(--danger);
+  animation: fadeInUp 0.2s ease;
+}
+
+/* --- Rejection type selector --- */
+.rejection-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.rejection-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-sm);
+  background: var(--bg-secondary);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.rejection-type-btn:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+}
+
+.rejection-type-btn--active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 16px var(--accent-glow);
+}
+
+/* --- Rejection reason buttons --- */
+.rejection-reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.rejection-reason-btn {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.rejection-reason-btn:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+}
+
+.rejection-reason-btn--active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
