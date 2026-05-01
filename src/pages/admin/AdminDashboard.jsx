@@ -9,6 +9,7 @@ import { GlassCard, Button, InputGroup, Badge } from '../../components/ui';
 import { AdminProductsTab } from './AdminProductsTab';
 import { AdminLeaderboardTab } from './AdminLeaderboardTab';
 import { AdminStatisticsTab } from './AdminStatisticsTab';
+import { AdminMeetingsTab } from './AdminMeetingsTab';
 import '../../styles/admin.css';
 
 // Утилиты для генерации
@@ -46,7 +47,6 @@ const generatePassword = () => {
 export function AdminDashboard() {
   const { logout } = useAuthStore();
   const { users, fetchUsers, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
-  const { rejections, fetchRejections } = useRejectionsStore();
   const { links, customLinks, fetchLinks, saveLinks, saveCustomLinks } = useSettingsStore();
   const navigate = useNavigate();
 
@@ -65,9 +65,8 @@ export function AdminDashboard() {
 
   useEffect(() => {
     fetchUsers();
-    fetchRejections();
     fetchLinks();
-  }, [fetchUsers, fetchRejections, fetchLinks]);
+  }, [fetchUsers, fetchLinks]);
 
   // Sync link inputs when settings load
   useEffect(() => {
@@ -159,10 +158,10 @@ export function AdminDashboard() {
           <UserPlus size={16} /> Сотрудники
         </button>
         <button
-          className={`admin-tabs__tab ${activeTab === 'rejections' ? 'admin-tabs__tab--active' : ''}`}
-          onClick={() => setActiveTab('rejections')}
+          className={`admin-tabs__tab ${activeTab === 'meetings' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('meetings')}
         >
-          <FileX size={16} /> Отказы, НДЗ, переносы
+          <FileX size={16} /> Встречи
         </button>
         <button
           className={`admin-tabs__tab ${activeTab === 'links' ? 'admin-tabs__tab--active' : ''}`}
@@ -316,62 +315,8 @@ export function AdminDashboard() {
         </>
         )}
 
-        {/* REJECTIONS TAB */}
-        {activeTab === 'rejections' && (
-          <GlassCard className="admin-card">
-            <h3 className="admin-card__title">
-              <FileX size={18} /> Отказы, НДЗ, переносы ({rejections.length})
-            </h3>
-
-            {rejections.length === 0 ? (
-              <div className="admin-empty">Нет записей</div>
-            ) : (
-              <div className="admin-table-container">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Сотрудник</th>
-                      <th>ID встречи</th>
-                      <th>Вид</th>
-                      <th>Причина</th>
-                      <th>День переноса</th>
-                      <th>Комментарий</th>
-                      <th>Дата</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rejections.map((r) => (
-                      <tr key={r.id}>
-                        <td><strong>{r.users?.fullName || '—'}</strong></td>
-                        <td className="monospace-cell">{r.meetingId}</td>
-                        <td>
-                          <Badge variant={
-                            r.type === 'НДЗ' ? 'warning' :
-                            r.type === 'Перенос' ? 'primary' : 'danger'
-                          }>
-                            {r.type}
-                          </Badge>
-                        </td>
-                        <td style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                          {r.reason || '—'}
-                        </td>
-                        <td style={{ fontSize: '0.85em' }}>
-                          {r.transferDate || '—'}
-                        </td>
-                        <td style={{ fontSize: '0.85em', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {r.comment || '—'}
-                        </td>
-                        <td style={{ fontSize: '0.85em', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
-                          {r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </GlassCard>
-        )}
+        {/* MEETINGS TAB */}
+        {activeTab === 'meetings' && <AdminMeetingsTab />}
 
         {/* LINKS TAB */}
         {activeTab === 'links' && (

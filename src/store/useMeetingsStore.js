@@ -17,7 +17,7 @@ export const useMeetingsStore = create((set, get) => ({
     if (!userId || userId === 'admin_root') return;
     const { data, error } = await supabase
       .from('meetings')
-      .select('*')
+      .select('*, users(fullName)')
       .eq('userId', userId)
       .order('created_at', { ascending: false });
       
@@ -30,7 +30,7 @@ export const useMeetingsStore = create((set, get) => ({
   },
 
   fetchAllMeetings: async () => {
-    const { data, error } = await supabase.from('meetings').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('meetings').select('*, users(fullName)').order('created_at', { ascending: false });
     if (error) console.error('Error fetching all meetings:', error);
     else {
       const grouped = {};
@@ -38,19 +38,20 @@ export const useMeetingsStore = create((set, get) => ({
           if (!grouped[m.userId]) grouped[m.userId] = [];
           grouped[m.userId].push(m);
       });
-      set({ meetingsByUser: grouped });
+      set({ meetingsByUser: grouped, meetings: data });
     }
   },
 
   addMeeting: async (meeting, userId) => {
     const dbMeeting = {
       userId,
+      meetingId: meeting.meetingId,
       clientName: meeting.clientName,
       meeting_timestamp: meeting.meeting_timestamp,
       total_earned: meeting.total_earned,
       products: meeting.products
     };
-    const { data, error } = await supabase.from('meetings').insert([dbMeeting]).select().single();
+    const { data, error } = await supabase.from('meetings').insert([dbMeeting]).select('*, users(fullName)').single();
     if (error) console.error('Error adding meeting:', error);
     else {
       set((s) => {
