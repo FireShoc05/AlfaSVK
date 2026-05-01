@@ -1,12 +1,5 @@
--- 1. Создаем таблицу settings (если вдруг её вообще нет)
-CREATE TABLE IF NOT EXISTS public.settings (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    key TEXT NOT NULL,
-    value JSONB
-);
+-- 1. Удаляем старое ограничение, которое запрещало одинаковые ключи для разных групп
+ALTER TABLE public.settings DROP CONSTRAINT IF EXISTS settings_key_key;
 
--- 2. Добавляем колонку group_id в таблицу settings
-ALTER TABLE public.settings ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES public.groups(id) ON DELETE CASCADE;
-
--- 3. Разрешаем полный доступ к таблице settings (RLS Policy)
-CREATE POLICY "Enable full access for settings" ON public.settings FOR ALL USING (true) WITH CHECK (true);
+-- 2. Создаем правильное ограничение: ключ уникален только внутри одной конкретной группы
+ALTER TABLE public.settings ADD CONSTRAINT settings_key_group_id_key UNIQUE (key, group_id);

@@ -18,10 +18,7 @@ const DEFAULT_LEADERBOARD_TABS = [
  * Generic helper: upsert a key-value pair into the `settings` table.
  */
 async function upsertSetting(key, value, groupId) {
-  if (!groupId) {
-    alert(`Ошибка: отсутствует ID группы (groupId) при сохранении ${key}! Перезайдите в аккаунт.`);
-    return false;
-  }
+  if (!groupId) return false;
 
   const { data: existing } = await supabase
     .from('settings')
@@ -39,7 +36,6 @@ async function upsertSetting(key, value, groupId) {
 
   if (error) {
     console.error(`Error saving setting "${key}":`, error);
-    alert(`Ошибка БД при сохранении ${key}: ${error.message || error.details || JSON.stringify(error)}`);
     return false;
   }
   return true;
