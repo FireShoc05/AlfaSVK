@@ -149,6 +149,7 @@ export function SchedulePage() {
     const success = await saveMonthSchedule(user.id, monthKey, shiftsToUpsert, datesToDelete);
     if (success) {
       fetchLocks(monthKey); // Refresh locks
+      fetchSchedules(monthKey, user.id); // Refresh schedules from DB
       setShowConfirm(false);
     }
     setIsSaving(false);
@@ -162,7 +163,9 @@ export function SchedulePage() {
     if (shift) {
       content = (
         <div className="calendar-day__shift">
-          <span className="calendar-day__time">{shift.start_time} - {shift.end_time}</span>
+          <span className="calendar-day__time">
+            {shift.start_time.replace(/^0/, '')}-{shift.end_time.replace(/^0/, '')}
+          </span>
           {shift.is_extra && <span className="calendar-day__badge calendar-day__badge--extra">Доп. смена</span>}
         </div>
       );

@@ -130,7 +130,7 @@ function GeneralSchedule() {
         <div style={{ marginTop: '20px', width: '100%', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {daySchedules.slice(0, 4).map(s => (
             <div key={s.id} style={{ fontSize: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', background: s.is_extra ? 'rgba(168, 85, 247, 0.2)' : 'var(--glass-bg)', padding: '2px 4px', borderRadius: '4px', color: s.is_extra ? '#c084fc' : 'var(--text-secondary)' }}>
-              {s.users?.fullName?.split(' ')[0]} {s.start_time}-{s.end_time}
+              {s.users?.fullName?.split(' ')[0]} {s.start_time.replace(/^0/, '')}-{s.end_time.replace(/^0/, '')}
             </div>
           ))}
           {daySchedules.length > 4 && (
@@ -389,7 +389,9 @@ function PersonalSchedule() {
     if (shift) {
       content = (
         <div className="calendar-day__shift">
-          <span className="calendar-day__time">{shift.start_time} - {shift.end_time}</span>
+          <span className="calendar-day__time">
+            {shift.start_time.replace(/^0/, '')}-{shift.end_time.replace(/^0/, '')}
+          </span>
           {shift.is_extra && <span className="calendar-day__badge calendar-day__badge--extra">Доп. смена</span>}
         </div>
       );

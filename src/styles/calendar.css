@@ -225,11 +225,29 @@
 }
 
 @media (max-width: 640px) {
+  .calendar-day {
+    padding: 2px;
+  }
+  .calendar-grid {
+    gap: 2px;
+  }
+  .calendar-day__num {
+    top: 2px;
+    right: 4px;
+    font-size: 11px;
+  }
   .calendar-day__time {
-    font-size: 12px;
+    font-size: 9px;
+    white-space: nowrap;
+    letter-spacing: -0.5px;
   }
   .calendar-day__off {
-    font-size: 10px;
+    font-size: 9px;
+  }
+  .calendar-day__badge {
+    font-size: 8px;
+    padding: 2px 4px;
+    margin-top: 2px;
   }
   .calendar-header__title {
     font-size: var(--font-base);
@@ -240,4 +258,8 @@
   .shift-selectors {
     flex-direction: column;
   }
+  .calendar-day__shift {
+    margin-top: 8px;
+  }
 }
+

@@ -42,35 +42,56 @@ export const useScheduleStore = create((set, get) => ({
   // Save employee's schedule for a month and lock it
   saveMonthSchedule: async (userId, month, shiftsToUpsert, datesToDelete) => {
     try {
-      // 1. Delete removed shifts (only if they are not extra)
-      if (datesToDelete.length > 0) {
-        await supabase
-          .from('schedules')
-          .delete()
-          .eq('userId', userId)
-          .in('date', datesToDelete)
-          .eq('is_extra', false); // Employees cannot delete admin's extra shifts
+      // Delete all non-extra shifts for this user in this month
+      // month is 'YYYY-MM', we can use .like('date', `${month}-%`)
+      const { error: delError } = await supabase
+        .from('schedules')
+        .delete()
+        .eq('userId', userId)
+        .like('date', `${month}-%`)
+        .eq('is_extra', false);
+
+      if (delError) {
+        console.error('Error deleting old shifts:', delError);
+        return false;
       }
 
-      // 2. Upsert new/modified shifts
+      // 2. Insert new shifts
       if (shiftsToUpsert.length > 0) {
         const payload = shiftsToUpsert.map(shift => ({
           userId,
           date: shift.date,
           start_time: shift.start_time,
           end_time: shift.end_time,
-          is_extra: shift.is_extra || false
+          is_extra: false
         }));
         
-        await supabase
+        const { error: insError } = await supabase
           .from('schedules')
-          .upsert(payload, { onConflict: 'userId, date' });
+          .insert(payload);
+          
+        if (insError) {
+          console.error('Error inserting new shifts:', insError);
+          return false;
+        }
       }
 
       // 3. Lock the month
-      await supabase
+      const { error: lockError } = await supabase
         .from('schedule_locks')
-        .upsert([{ userId, month }], { onConflict: 'userId, month' });
+        .upsert([{ userId, month }], { onConflict: '"userId", month' })
+        .select()
+        .single();
+        
+      if (lockError) {
+        // If "userId", month fails, try without quotes
+        const { error: lockError2 } = await supabase
+          .from('schedule_locks')
+          .upsert([{ userId, month }], { onConflict: 'userId, month' });
+        if (lockError2) {
+          console.error('Error locking month:', lockError2);
+        }
+      }
         
       return true;
     } catch (err) {
@@ -81,6 +102,14 @@ export const useScheduleStore = create((set, get) => ({
 
   // Admin functions
   adminSaveShift: async (userId, date, start_time, end_time, is_extra) => {
+    // 1. Delete existing shift for this user and date
+    await supabase
+      .from('schedules')
+      .delete()
+      .eq('userId', userId)
+      .eq('date', date);
+
+    // 2. Insert new shift
     const payload = {
       userId,
       date,
@@ -90,7 +119,7 @@ export const useScheduleStore = create((set, get) => ({
     };
     const { error } = await supabase
       .from('schedules')
-      .upsert([payload], { onConflict: 'userId, date' });
+      .insert([payload]);
       
     if (error) {
       console.error('Error admin saving shift:', error);
