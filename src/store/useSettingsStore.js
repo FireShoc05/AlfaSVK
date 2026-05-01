@@ -17,18 +17,21 @@ const DEFAULT_LEADERBOARD_TABS = [
 /**
  * Generic helper: upsert a key-value pair into the `settings` table.
  */
-async function upsertSetting(key, value) {
+async function upsertSetting(key, value, groupId) {
+  if (!groupId) return false;
+
   const { data: existing } = await supabase
     .from('settings')
     .select('id')
     .eq('key', key)
+    .eq('group_id', groupId)
     .maybeSingle();
 
   let error;
   if (existing) {
-    ({ error } = await supabase.from('settings').update({ value }).eq('key', key));
+    ({ error } = await supabase.from('settings').update({ value }).eq('id', existing.id));
   } else {
-    ({ error } = await supabase.from('settings').insert([{ key, value }]));
+    ({ error } = await supabase.from('settings').insert([{ key, value, group_id: groupId }]));
   }
 
   if (error) {
@@ -55,11 +58,13 @@ export const useSettingsStore = create((set, get) => ({
 
   // ─── Links ────────────────────────────────────
 
-  fetchLinks: async () => {
+  fetchLinks: async (groupId) => {
+    if (!groupId) return;
     const { data: qlData, error: qlError } = await supabase
       .from('settings')
       .select('*')
       .eq('key', 'quick_links')
+      .eq('group_id', groupId)
       .maybeSingle();
 
     if (qlError) console.error('Error fetching quick_links:', qlError);
@@ -68,6 +73,7 @@ export const useSettingsStore = create((set, get) => ({
       .from('settings')
       .select('*')
       .eq('key', 'custom_links')
+      .eq('group_id', groupId)
       .maybeSingle();
 
     if (clError) console.error('Error fetching custom_links:', clError);
@@ -79,21 +85,22 @@ export const useSettingsStore = create((set, get) => ({
     });
   },
 
-  saveLinks: async (newLinks) => {
-    const ok = await upsertSetting('quick_links', newLinks);
+  saveLinks: async (newLinks, groupId) => {
+    const ok = await upsertSetting('quick_links', newLinks, groupId);
     if (ok) set({ links: newLinks });
     return ok;
   },
 
-  saveCustomLinks: async (newCustomLinks) => {
-    const ok = await upsertSetting('custom_links', newCustomLinks);
+  saveCustomLinks: async (newCustomLinks, groupId) => {
+    const ok = await upsertSetting('custom_links', newCustomLinks, groupId);
     if (ok) set({ customLinks: newCustomLinks });
     return ok;
   },
 
   // ─── Products ─────────────────────────────────
 
-  fetchProducts: async () => {
+  fetchProducts: async (groupId) => {
+    if (!groupId) return;
     const keys = ['products_main', 'products_cross', 'products_services'];
     const results = {};
 
@@ -102,6 +109,7 @@ export const useSettingsStore = create((set, get) => ({
         .from('settings')
         .select('*')
         .eq('key', key)
+        .eq('group_id', groupId)
         .maybeSingle();
       if (error) console.error(`Error fetching ${key}:`, error);
       results[key] = data?.value || null;
@@ -115,31 +123,33 @@ export const useSettingsStore = create((set, get) => ({
     });
   },
 
-  saveProductsMain: async (products) => {
-    const ok = await upsertSetting('products_main', products);
+  saveProductsMain: async (products, groupId) => {
+    const ok = await upsertSetting('products_main', products, groupId);
     if (ok) set({ productsMain: products });
     return ok;
   },
 
-  saveProductsCross: async (products) => {
-    const ok = await upsertSetting('products_cross', products);
+  saveProductsCross: async (products, groupId) => {
+    const ok = await upsertSetting('products_cross', products, groupId);
     if (ok) set({ productsCross: products });
     return ok;
   },
 
-  saveProductsServices: async (products) => {
-    const ok = await upsertSetting('products_services', products);
+  saveProductsServices: async (products, groupId) => {
+    const ok = await upsertSetting('products_services', products, groupId);
     if (ok) set({ productsServices: products });
     return ok;
   },
 
   // ─── Leaderboard Config ───────────────────────
 
-  fetchLeaderboardTabs: async () => {
+  fetchLeaderboardTabs: async (groupId) => {
+    if (!groupId) return;
     const { data, error } = await supabase
       .from('settings')
       .select('*')
       .eq('key', 'leaderboard_tabs')
+      .eq('group_id', groupId)
       .maybeSingle();
 
     if (error) console.error('Error fetching leaderboard_tabs:', error);
@@ -150,8 +160,8 @@ export const useSettingsStore = create((set, get) => ({
     });
   },
 
-  saveLeaderboardTabs: async (tabs) => {
-    const ok = await upsertSetting('leaderboard_tabs', tabs);
+  saveLeaderboardTabs: async (tabs, groupId) => {
+    const ok = await upsertSetting('leaderboard_tabs', tabs, groupId);
     if (ok) set({ leaderboardTabs: tabs });
     return ok;
   },

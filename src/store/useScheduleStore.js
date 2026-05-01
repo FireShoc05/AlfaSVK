@@ -8,8 +8,8 @@ export const useScheduleStore = create((set, get) => ({
 
   // Fetch schedules for a specific month (format 'YYYY-MM')
   // If userId is provided, fetch only for that user
-  fetchSchedules: async (month, userId = null) => {
-    let query = supabase.from('schedules').select('*, users(fullName, username)');
+  fetchSchedules: async (month, userId = null, groupId = null) => {
+    let query = supabase.from('schedules').select('*, users!inner(fullName, username, group_id)');
     
     // Filter by month using precise date bounds
     const [year, m] = month.split('-');
@@ -18,6 +18,10 @@ export const useScheduleStore = create((set, get) => ({
     
     if (userId) {
       query = query.eq('userId', userId);
+    }
+    
+    if (groupId) {
+      query = query.eq('users.group_id', groupId);
     }
     
     const { data, error } = await query;
@@ -63,8 +67,11 @@ export const useScheduleStore = create((set, get) => ({
 
       // 2. Insert new shifts
       if (shiftsToUpsert.length > 0) {
+        // Find group_id for this user
+        const { data: userData } = await supabase.from('users').select('group_id').eq('id', userId).single();
         const payload = shiftsToUpsert.map(shift => ({
           userId,
+          group_id: userData?.group_id || null,
           date: shift.date,
           start_time: shift.start_time,
           end_time: shift.end_time,
@@ -105,7 +112,6 @@ export const useScheduleStore = create((set, get) => ({
     }
   },
 
-  // Admin functions
   adminSaveShift: async (userId, date, start_time, end_time, is_extra) => {
     // 1. Delete existing shift for this user and date
     await supabase
@@ -114,9 +120,12 @@ export const useScheduleStore = create((set, get) => ({
       .eq('userId', userId)
       .eq('date', date);
 
+    const { data: userData } = await supabase.from('users').select('group_id').eq('id', userId).single();
+
     // 2. Insert new shift
     const payload = {
       userId,
+      group_id: userData?.group_id || null,
       date,
       start_time,
       end_time,

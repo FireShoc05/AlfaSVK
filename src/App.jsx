@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { TrainingPage } from './pages/TrainingPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { SuperAdminDashboard } from './pages/superadmin/SuperAdminDashboard';
 
 import { MeetingPage } from './pages/MeetingPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
@@ -23,6 +24,13 @@ export default function App() {
       <Route path="/admin" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminDashboard />
+        </ProtectedRoute>
+      } />
+
+      {/* Супер-админ панель */}
+      <Route path="/superadmin" element={
+        <ProtectedRoute allowedRoles={['superadmin']}>
+          <SuperAdminDashboard />
         </ProtectedRoute>
       } />
 

@@ -4,6 +4,7 @@ import { useMeetingsStore } from '../../store/useMeetingsStore';
 import { useRejectionsStore } from '../../store/useRejectionsStore';
 import { useUsersStore } from '../../store/useUsersStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { GlassCard, Button, Badge } from '../../components/ui';
 import { formatCurrency } from '../../utils/formatters';
 import '../../styles/admin.css';
@@ -19,6 +20,7 @@ export function AdminStatisticsTab() {
   const { fetchRejections, rejections } = useRejectionsStore();
   const { fetchUsers, users } = useUsersStore();
   const { fetchProducts, productsMain, productsCross, productsServices } = useSettingsStore();
+  const { user } = useAuthStore();
 
   // Date selection
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -33,11 +35,13 @@ export function AdminStatisticsTab() {
 
   // Initial fetch
   useEffect(() => {
-    fetchAllMeetings();
-    fetchRejections();
-    fetchUsers();
-    fetchProducts();
-  }, [fetchAllMeetings, fetchRejections, fetchUsers, fetchProducts]);
+    if (user?.group_id) {
+      fetchAllMeetings(user.group_id);
+      fetchRejections(user.group_id);
+      fetchUsers(user.group_id);
+      fetchProducts(user.group_id);
+    }
+  }, [fetchAllMeetings, fetchRejections, fetchUsers, fetchProducts, user?.group_id]);
 
   // Compute stats for selected date
   const stats = useMemo(() => {

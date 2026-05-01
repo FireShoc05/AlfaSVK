@@ -13,6 +13,7 @@ export function OnboardingPage() {
   const [phone, setPhone] = useState(user?.phone || '');
   const [telegram, setTelegram] = useState(user?.telegram || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [newLogin, setNewLogin] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -45,6 +46,10 @@ export function OnboardingPage() {
       tempPassword: newPassword, // Обновляем пароль
     };
 
+    if (user.role === 'admin' && newLogin.trim()) {
+      updates.username = newLogin.trim();
+    }
+
     // Обновляем текущую сессию
     updateAuthUser(updates);
     
@@ -68,11 +73,21 @@ export function OnboardingPage() {
             Для завершения настройки профиля <strong>укажите контактные данные</strong> и <strong>смените пароль</strong>.
             <br />
             (Заполните хотя бы одно поле из контактов)
+            {user?.role === 'admin' && <><br />Также вы можете изменить свой логин (необязательно).</>}
           </p>
         </div>
 
         <GlassCard className="login-card">
           <form onSubmit={handleSubmit} className="login-form">
+            {user?.role === 'admin' && (
+              <InputGroup 
+                id="new-login" 
+                label="Новый логин (необязательно)" 
+                placeholder="Придумайте новый логин"
+                value={newLogin}
+                onChange={setNewLogin}
+              />
+            )}
             <InputGroup 
               id="phone" 
               label="Номер телефона" 

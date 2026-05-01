@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, User as UserIcon, Plus, X, Search, Clock } from 'lucide-react';
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { useUsersStore } from '../../store/useUsersStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { GlassCard, Button, Modal, Badge } from '../../components/ui';
 
 const ODD_HOURS = [9, 11, 13, 15, 17, 19, 21, 23];
@@ -43,6 +44,7 @@ export function AdminScheduleTab() {
 function GeneralSchedule() {
   const { schedules, fetchSchedules, adminDeleteShift, adminSaveShift } = useScheduleStore();
   const { users, fetchUsers } = useUsersStore();
+  const { user } = useAuthStore();
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
@@ -56,12 +58,16 @@ function GeneralSchedule() {
   const [editingShiftId, setEditingShiftId] = useState(null);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (user?.group_id) {
+      fetchUsers(user.group_id);
+    }
+  }, [fetchUsers, user?.group_id]);
 
   useEffect(() => {
-    fetchSchedules(monthKey);
-  }, [monthKey, fetchSchedules]);
+    if (user?.group_id) {
+      fetchSchedules(monthKey, null, user.group_id);
+    }
+  }, [monthKey, fetchSchedules, user?.group_id]);
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayIndex = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -105,14 +111,14 @@ function GeneralSchedule() {
     const endStr = `${String(shiftEnd).padStart(2, '0')}:00`;
     
     await adminSaveShift(selectedUserToAdd, selectedDay, startStr, endStr, isExtra);
-    fetchSchedules(monthKey);
+    if (user?.group_id) fetchSchedules(monthKey, null, user.group_id);
     resetForm();
   };
 
   const handleDeleteShift = async (userId) => {
     if (window.confirm('Точно удалить смену сотрудника?')) {
       await adminDeleteShift(userId, selectedDay);
-      fetchSchedules(monthKey);
+      if (user?.group_id) fetchSchedules(monthKey, null, user.group_id);
       if (editingShiftId) resetForm();
     }
   };
@@ -271,6 +277,7 @@ function GeneralSchedule() {
 function PersonalSchedule() {
   const { schedules, fetchSchedules, adminSaveShift, adminDeleteShift } = useScheduleStore();
   const { users, fetchUsers } = useUsersStore();
+  const { user } = useAuthStore();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
@@ -284,14 +291,16 @@ function PersonalSchedule() {
   const [isExtra, setIsExtra] = useState(false);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (user?.group_id) {
+      fetchUsers(user.group_id);
+    }
+  }, [fetchUsers, user?.group_id]);
 
   useEffect(() => {
-    if (selectedUser) {
-      fetchSchedules(monthKey, selectedUser.id);
+    if (selectedUser && user?.group_id) {
+      fetchSchedules(monthKey, selectedUser.id, user.group_id);
     }
-  }, [selectedUser, monthKey, fetchSchedules]);
+  }, [selectedUser, monthKey, fetchSchedules, user?.group_id]);
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm.trim()) return [];
@@ -327,14 +336,14 @@ function PersonalSchedule() {
     const startStr = `${String(shiftStart).padStart(2, '0')}:00`;
     const endStr = `${String(shiftEnd).padStart(2, '0')}:00`;
     await adminSaveShift(selectedUser.id, selectedDay, startStr, endStr, isExtra);
-    fetchSchedules(monthKey, selectedUser.id);
+    if (user?.group_id) fetchSchedules(monthKey, selectedUser.id, user.group_id);
     setSelectedDay(null);
   };
 
   const handleRemoveShift = async () => {
     if (schedulesMap[selectedDay]) {
       await adminDeleteShift(selectedUser.id, selectedDay);
-      fetchSchedules(monthKey, selectedUser.id);
+      if (user?.group_id) fetchSchedules(monthKey, selectedUser.id, user.group_id);
     }
     setSelectedDay(null);
   };

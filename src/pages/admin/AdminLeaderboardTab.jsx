@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Plus, Trash2, Save, Check, GripVertical } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { GlassCard, Button, Badge } from '../../components/ui';
 import '../../styles/admin.css';
 
@@ -37,6 +38,7 @@ export function AdminLeaderboardTab() {
     leaderboardTabs, fetchLeaderboardTabs, saveLeaderboardTabs,
     productsMain, productsCross, productsServices, fetchProducts,
   } = useSettingsStore();
+  const { user } = useAuthStore();
 
   const [localTabs, setLocalTabs] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -50,9 +52,11 @@ export function AdminLeaderboardTab() {
   const [addLabel, setAddLabel] = useState('');
 
   useEffect(() => {
-    fetchLeaderboardTabs();
-    fetchProducts();
-  }, [fetchLeaderboardTabs, fetchProducts]);
+    if (user?.group_id) {
+      fetchLeaderboardTabs(user.group_id);
+      fetchProducts(user.group_id);
+    }
+  }, [fetchLeaderboardTabs, fetchProducts, user?.group_id]);
 
   useEffect(() => {
     setLocalTabs(leaderboardTabs || []);
@@ -109,7 +113,7 @@ export function AdminLeaderboardTab() {
 
   const handleSave = async () => {
     setSaving(true);
-    const ok = await saveLeaderboardTabs(localTabs);
+    const ok = await saveLeaderboardTabs(localTabs, user?.group_id);
     setSaving(false);
     if (ok) {
       setSaved(true);

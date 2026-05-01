@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Package, Plus, Trash2, Save, Check, Edit3, X, CreditCard, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { GlassCard, Button, Modal } from '../../components/ui';
 import '../../styles/admin.css';
 
@@ -499,6 +500,7 @@ export function AdminProductsTab() {
     productsMain, productsCross, productsServices,
     fetchProducts, saveProductsMain, saveProductsCross, saveProductsServices
   } = useSettingsStore();
+  const { user } = useAuthStore();
 
   // Original snapshots (set once when data loads from Supabase)
   const [originalMain, setOriginalMain] = useState([]);
@@ -522,8 +524,10 @@ export function AdminProductsTab() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (user?.group_id) {
+      fetchProducts(user.group_id);
+    }
+  }, [fetchProducts, user?.group_id]);
 
   // Sync local + snapshot when store data loads
   useEffect(() => {
@@ -613,9 +617,9 @@ export function AdminProductsTab() {
 
   const handleConfirmSave = async () => {
     setSaving(true);
-    const ok1 = await saveProductsMain(localMain);
-    const ok2 = await saveProductsCross(localCross);
-    const ok3 = await saveProductsServices(localServices);
+    const ok1 = await saveProductsMain(localMain, user?.group_id);
+    const ok2 = await saveProductsCross(localCross, user?.group_id);
+    const ok3 = await saveProductsServices(localServices, user?.group_id);
     setSaving(false);
 
     if (ok1 && ok2 && ok3) {

@@ -4,19 +4,26 @@ import { supabase } from '../lib/supabaseClient';
 export const useUsersStore = create((set, get) => ({
   users: [],
   
-  fetchUsers: async () => {
-    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+  fetchUsers: async (groupId) => {
+    if (!groupId) return;
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: false });
     if (error) console.error('Error fetching users:', error);
     else set({ users: data || [] });
   },
 
-  addUser: async (user) => {
+  addUser: async (user, groupId) => {
+    if (!groupId) return;
     const dbUser = {
       fullName: user.fullName,
       username: user.username,
       tempPassword: user.tempPassword,
       role: user.role,
       status: user.status,
+      group_id: groupId,
       joinDate: user.joinDate || new Date().toISOString().split('T')[0]
     };
     const { data, error } = await supabase.from('users').insert([dbUser]).select().single();

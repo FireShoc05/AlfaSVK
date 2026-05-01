@@ -3,11 +3,13 @@ import { GlassCard, Button, Badge, Modal } from '../../components/ui';
 import { useMeetingsStore } from '../../store/useMeetingsStore';
 import { useRejectionsStore } from '../../store/useRejectionsStore';
 import { FileX, CheckCircle, Search, Calendar, Info, Clock, AlertTriangle } from 'lucide-react';
+import { useAuthStore } from '../../store/useAuthStore';
 import { formatCurrency } from '../../utils/formatters';
 
 export function AdminMeetingsTab() {
   const { meetings, fetchAllMeetings } = useMeetingsStore();
   const { rejections, fetchRejections } = useRejectionsStore();
+  const { user } = useAuthStore();
 
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
@@ -24,9 +26,11 @@ export function AdminMeetingsTab() {
   const [selectedMeeting, setSelectedMeeting] = useState(null);
 
   useEffect(() => {
-    fetchAllMeetings();
-    fetchRejections();
-  }, [fetchAllMeetings, fetchRejections]);
+    if (user?.group_id) {
+      fetchAllMeetings(user.group_id);
+      fetchRejections(user.group_id);
+    }
+  }, [fetchAllMeetings, fetchRejections, user?.group_id]);
 
   const unifiedData = useMemo(() => {
     const merged = [];

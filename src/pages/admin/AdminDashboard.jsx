@@ -46,7 +46,7 @@ const generatePassword = () => {
 };
 
 export function AdminDashboard() {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const { users, fetchUsers, addUser, regeneratePassword, updateUser, deleteUser } = useUsersStore();
   const { links, customLinks, fetchLinks, saveLinks, saveCustomLinks } = useSettingsStore();
   const navigate = useNavigate();
@@ -65,9 +65,11 @@ export function AdminDashboard() {
   const [newLinkUrl, setNewLinkUrl] = useState('');
 
   useEffect(() => {
-    fetchUsers();
-    fetchLinks();
-  }, [fetchUsers, fetchLinks]);
+    if (user?.group_id) {
+      fetchUsers(user.group_id);
+      fetchLinks(user.group_id);
+    }
+  }, [fetchUsers, fetchLinks, user?.group_id]);
 
   // Sync link inputs when settings load
   useEffect(() => {
@@ -101,7 +103,7 @@ export function AdminDashboard() {
       tempPassword: newPassword,
       status, // "На обучении" | "Действующий сотрудник"
       role: 'agent',
-    });
+    }, user.group_id);
 
     setFullName('');
     setStatus('Действующий сотрудник');
@@ -460,8 +462,8 @@ export function AdminDashboard() {
                 disabled={linksSaving}
                 onClick={async () => {
                   setLinksSaving(true);
-                  const ok1 = await saveLinks({ max_url: linkMaxUrl.trim(), sfago_url: linkSfagoUrl.trim() });
-                  const ok2 = await saveCustomLinks(customLinksLocal);
+                  const ok1 = await saveLinks({ max_url: linkMaxUrl.trim(), sfago_url: linkSfagoUrl.trim() }, user?.group_id);
+                  const ok2 = await saveCustomLinks(customLinksLocal, user?.group_id);
                   setLinksSaving(false);
                   if (ok1 && ok2) setLinksSaved(true);
                 }}

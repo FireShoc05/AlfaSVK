@@ -420,13 +420,15 @@ export function WizardContainer({ onBack }) {
   const [meetingId, setMeetingId] = useState('');
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (user?.group_id) {
+      fetchProducts(user.group_id);
+    }
+  }, [fetchProducts, user?.group_id]);
 
   const handleComplete = async () => {
     const json = generateMeetingJSON(store, user?.fullName || 'АДМИН', meetingId.trim(), MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES);
     console.log('📦 Meeting JSON:', JSON.stringify(json, null, 2));
-    await addMeeting(json, user?.id);
+    await addMeeting(json, user?.id, user?.group_id);
     setShowSuccess(true);
   };
 

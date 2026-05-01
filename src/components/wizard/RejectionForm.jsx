@@ -92,7 +92,7 @@ export function RejectionForm({ onBack }) {
       reason: needsReason ? reason : null,
       transferDate: needsTransferDate ? transferDate : null,
       comment: comment.trim() || null,
-    });
+    }, user?.group_id);
 
     setSaving(false);
     if (success) {

@@ -29,8 +29,13 @@ export const useMeetingsStore = create((set, get) => ({
     }
   },
 
-  fetchAllMeetings: async () => {
-    const { data, error } = await supabase.from('meetings').select('*, users(fullName)').order('created_at', { ascending: false });
+  fetchAllMeetings: async (groupId) => {
+    if (!groupId) return;
+    const { data, error } = await supabase
+      .from('meetings')
+      .select('*, users(fullName)')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: false });
     if (error) console.error('Error fetching all meetings:', error);
     else {
       const grouped = {};
@@ -42,9 +47,11 @@ export const useMeetingsStore = create((set, get) => ({
     }
   },
 
-  addMeeting: async (meeting, userId) => {
+  addMeeting: async (meeting, userId, groupId) => {
+    if (!groupId) return;
     const dbMeeting = {
       userId,
+      group_id: groupId,
       meetingId: meeting.meetingId,
       clientName: meeting.clientName,
       meeting_timestamp: meeting.meeting_timestamp,

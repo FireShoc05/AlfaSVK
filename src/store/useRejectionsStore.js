@@ -4,19 +4,22 @@ import { supabase } from '../lib/supabaseClient';
 export const useRejectionsStore = create((set) => ({
   rejections: [],
 
-  fetchRejections: async () => {
+  fetchRejections: async (groupId) => {
+    if (!groupId) return;
     const { data, error } = await supabase
       .from('rejections')
       .select('*, users(fullName)')
+      .eq('group_id', groupId)
       .order('created_at', { ascending: false });
     if (error) console.error('Error fetching rejections:', error);
     else set({ rejections: data || [] });
   },
 
-  addRejection: async (rejection) => {
+  addRejection: async (rejection, groupId) => {
+    if (!groupId) return false;
     const { data, error } = await supabase
       .from('rejections')
-      .insert([rejection])
+      .insert([{ ...rejection, group_id: groupId }])
       .select('*, users(fullName)')
       .single();
     if (error) {

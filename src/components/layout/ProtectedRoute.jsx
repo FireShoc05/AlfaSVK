@@ -16,12 +16,17 @@ export function ProtectedRoute({ children, allowedRoles }) {
 
   // Проверка ролей
   if (allowedRoles && !allowedRoles.includes(user.role)) {
+    if (user.role === 'superadmin') return <Navigate to="/superadmin" replace />;
     if (user.role === 'agent') return <Navigate to="/" replace />;
     if (user.role === 'admin') return <Navigate to="/admin" replace />;
   }
 
-  // Спец-проверки только для сотрудников (не админов)
-  if (user.role !== 'admin') {
+  if (user.role === 'superadmin' && location.pathname !== '/superadmin') {
+    return <Navigate to="/superadmin" replace />;
+  }
+
+  // Спец-проверки только для сотрудников (не админов и не суперадминов)
+  if (user.role !== 'admin' && user.role !== 'superadmin') {
     const path = location.pathname;
 
     // 1. Проверка онбординга (высший приоритет)

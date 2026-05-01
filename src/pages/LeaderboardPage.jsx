@@ -5,6 +5,7 @@ import { Trophy } from 'lucide-react';
 import { useMeetingsStore } from '../store/useMeetingsStore';
 import { useUsersStore } from '../store/useUsersStore';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { formatCurrency } from '../utils/formatters';
 
 const medals = ['🥇', '🥈', '🥉'];
@@ -14,14 +15,17 @@ export function LeaderboardPage() {
   const { fetchAllMeetings, getLeaderboardData } = useMeetingsStore();
   const { users, fetchUsers } = useUsersStore();
   const { leaderboardTabs, fetchLeaderboardTabs } = useSettingsStore();
+  const { user } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState('');
 
   useEffect(() => {
-    fetchUsers();
-    fetchAllMeetings();
-    fetchLeaderboardTabs();
-  }, [fetchUsers, fetchAllMeetings, fetchLeaderboardTabs]);
+    if (user?.group_id) {
+      fetchUsers(user.group_id);
+      fetchAllMeetings(user.group_id);
+      fetchLeaderboardTabs(user.group_id);
+    }
+  }, [fetchUsers, fetchAllMeetings, fetchLeaderboardTabs, user?.group_id]);
 
   // Set default active tab when tabs load
   useEffect(() => {
