@@ -669,12 +669,299 @@
   font-size: var(--font-xs);
 }
 
-.changes-preview__actions {
+/* ─── Statistics Tab ────────────────────────── */
+
+.admin-statistics-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  animation: fadeInUp 0.3s ease;
+}
+
+.admin-statistics-header__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.admin-date-picker-wrapper {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
 }
 
+.admin-date-picker-label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-date-picker-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--font-base);
+  font-weight: 700;
+  outline: none;
+}
+
+.admin-date-picker-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.admin-date-picker-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Global Summary Cards */
+.admin-stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.admin-stat-summary-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-stat-summary-card--earn {
+  background: rgba(34, 197, 94, 0.05);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.admin-stat-summary-card__label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.admin-stat-summary-card__value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.admin-stat-summary-card--earn .admin-stat-summary-card__value {
+  color: var(--success);
+}
+
+.admin-stat-summary-card__sub {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-xs);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.admin-stat-summary-card__sub-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-stat-summary-card__sub-item.success { color: var(--success); }
+.admin-stat-summary-card__sub-item.danger { color: var(--danger); }
+
+/* Global Products Grid */
+.admin-products-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-md);
+}
+
+.admin-stat-block {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  border: 1px solid var(--glass-border);
+}
+
+.admin-stat-block__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-stat-block__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-sm);
+}
+
+.admin-stat-row__name {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.admin-stat-row__value {
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.admin-stat-row__value--active {
+  color: var(--accent);
+}
+
+/* Divider */
+.admin-divider {
+  height: 1px;
+  background: var(--glass-border);
+  margin: var(--space-md) 0;
+}
+
+/* Employees Section */
+.admin-employees-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.admin-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.admin-search-box__icon {
+  color: var(--text-tertiary);
+  margin-right: 8px;
+}
+
+.admin-search-box__input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  width: 100%;
+  outline: none;
+}
+
+.admin-employees-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.admin-employee-accordion {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.admin-employee-accordion.expanded {
+  border-color: var(--glass-border-hover);
+}
+
+.admin-employee-accordion__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.admin-employee-accordion__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.admin-employee-accordion__name {
+  font-weight: 700;
+  font-size: var(--font-base);
+}
+
+.admin-employee-accordion__icon {
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.admin-employee-accordion__header:hover .admin-employee-accordion__icon {
+  color: var(--text-primary);
+}
+
+.admin-employee-accordion__body {
+  border-top: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-employee-stats-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  padding: var(--space-md) 16px;
+}
+
+.admin-emp-stat-col {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-emp-stat-col__title {
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.admin-emp-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-sm);
+}
+
+.admin-emp-stat-row span {
+  color: var(--text-secondary);
+}
+
+.admin-emp-stat-row strong {
+  color: var(--text-primary);
+}
