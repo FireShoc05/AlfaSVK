@@ -36,7 +36,7 @@ export function AdminMeetingsTab() {
         _id: `meet_${m.id}`,
         type: 'success',
         userFullName: m.users?.fullName || '—',
-        meetingId: m.meetingId || '—',
+        meetingId: m.meetingId === 'ЗАБЫЛ' ? 'Без ID (забыл указать)' : (m.meetingId || '—'),
         dateString: m.meeting_timestamp ? m.meeting_timestamp.split('T')[0] : (m.created_at ? m.created_at.split('T')[0] : ''),
         timestamp: new Date(m.created_at || m.meeting_timestamp).getTime(),
         createdAtFormatted: new Date(m.created_at || m.meeting_timestamp).toLocaleString('ru-RU', {
@@ -53,7 +53,7 @@ export function AdminMeetingsTab() {
         type: 'failure',
         subType: r.type, // 'Отказ', 'НДЗ', 'Перенос'
         userFullName: r.users?.fullName || '—',
-        meetingId: r.meetingId || '—',
+        meetingId: r.meetingId === 'ЗАБЫЛ' ? 'Без ID (забыл указать)' : (r.meetingId || '—'),
         dateString: r.created_at ? r.created_at.split('T')[0] : '',
         timestamp: new Date(r.created_at).getTime(),
         createdAtFormatted: new Date(r.created_at).toLocaleString('ru-RU', {

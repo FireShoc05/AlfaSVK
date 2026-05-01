@@ -456,7 +456,16 @@ export function WizardContainer({ onBack }) {
 
       {/* Meeting ID field */}
       <div className="wizard-meeting-id">
-        <label className="wizard-meeting-id__label">ID встречи</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <label className="wizard-meeting-id__label" style={{ marginBottom: 0 }}>ID встречи</label>
+          <button
+            type="button"
+            onClick={() => setMeetingId('ЗАБЫЛ')}
+            style={{ fontSize: '12px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            Забыл id
+          </button>
+        </div>
         <input
           type="text"
           className="wizard-meeting-id__input"

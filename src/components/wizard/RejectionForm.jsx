@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { XCircle, Save, ChevronLeft, CheckCircle, AlertTriangle, ArrowRightLeft, Ban } from 'lucide-react';
+import { XCircle, Save, ChevronLeft, CheckCircle, AlertTriangle, ArrowRightLeft, Ban, ShieldAlert } from 'lucide-react';
 import { Button, GlassCard, Modal } from '../ui';
 import { useRejectionsStore } from '../../store/useRejectionsStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -9,6 +9,7 @@ const REJECTION_TYPES = [
   { value: 'НДЗ', label: 'НДЗ', icon: <AlertTriangle size={18} /> },
   { value: 'Перенос', label: 'Перенос', icon: <ArrowRightLeft size={18} /> },
   { value: 'Отказ', label: 'Отказ', icon: <Ban size={18} /> },
+  { value: '911', label: '911', icon: <ShieldAlert size={18} /> },
 ];
 
 const TRANSFER_REASONS = [
@@ -76,6 +77,7 @@ export function RejectionForm({ onBack }) {
     if (!type) return false;
     if (needsReason && !reason) return false;
     if (needsTransferDate && !isTransferDateValid()) return false;
+    if (type === '911' && !comment.trim()) return false;
     return true;
   };
 
@@ -130,7 +132,16 @@ export function RejectionForm({ onBack }) {
       <GlassCard className="rejection-card">
         {/* Meeting ID */}
         <div className="rejection-field">
-          <label className="rejection-field__label">ID встречи</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <label className="rejection-field__label" style={{ marginBottom: 0 }}>ID встречи</label>
+            <button
+              type="button"
+              onClick={() => setMeetingId('ЗАБЫЛ')}
+              style={{ fontSize: '12px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              Забыл id
+            </button>
+          </div>
           <input
             type="text"
             className="rejection-field__input"
@@ -194,10 +205,12 @@ export function RejectionForm({ onBack }) {
           </div>
         )}
 
-        {/* Comment (for Перенос and Отказ) */}
-        {needsReason && (
+        {/* Comment (for Перенос, Отказ and 911) */}
+        {(needsReason || type === '911') && (
           <div className="rejection-field">
-            <label className="rejection-field__label">Комментарий <span className="rejection-field__optional">(необязательно)</span></label>
+            <label className="rejection-field__label">
+              Комментарий {type !== '911' && <span className="rejection-field__optional">(необязательно)</span>}
+            </label>
             <textarea
               className="rejection-field__textarea"
               placeholder="Комментарий о встрече..."
