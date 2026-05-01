@@ -11,6 +11,7 @@ import {
   X,
   ExternalLink,
   CalendarDays,
+  Users,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -23,6 +24,7 @@ const mainNav = [
 ];
 
 const secondaryNav = [
+  { to: '/colleagues', icon: Users, label: 'Коллеги' },
   { to: '/links', icon: Link, label: 'Полезные ссылки' },
   { to: '/admin', icon: Shield, label: 'Админ панель' },
 ];

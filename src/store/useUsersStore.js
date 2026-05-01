@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 
 export const useUsersStore = create((set, get) => ({
   users: [],
+  globalUsers: [], // Array for all users across all groups
   
   fetchUsers: async (groupId) => {
     if (!groupId) return;
@@ -13,6 +14,15 @@ export const useUsersStore = create((set, get) => ({
       .order('created_at', { ascending: false });
     if (error) console.error('Error fetching users:', error);
     else set({ users: data || [] });
+  },
+
+  fetchAllUsersGlobally: async () => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('fullName', { ascending: true });
+    if (error) console.error('Error fetching global users:', error);
+    else set({ globalUsers: data || [] });
   },
 
   addUser: async (user, groupId) => {

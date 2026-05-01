@@ -116,9 +116,9 @@ export const useSettingsStore = create((set, get) => ({
     }
 
     set({
-      productsMain: results['products_main'] || [...MAIN_PRODUCTS],
-      productsCross: results['products_cross'] || [...CROSS_PRODUCTS],
-      productsServices: results['products_services'] || [...SERVICES],
+      productsMain: results['products_main'] || [],
+      productsCross: results['products_cross'] || [],
+      productsServices: results['products_services'] || [],
       productsLoaded: true,
     });
   },
@@ -154,10 +154,8 @@ export const useSettingsStore = create((set, get) => ({
 
     if (error) console.error('Error fetching leaderboard_tabs:', error);
 
-    set({
-      leaderboardTabs: data?.value || [...DEFAULT_LEADERBOARD_TABS],
-      leaderboardLoaded: true,
-    });
+    set({ leaderboardTabs: data?.value || [] });
+    set({ leaderboardLoaded: true });
   },
 
   saveLeaderboardTabs: async (tabs, groupId) => {

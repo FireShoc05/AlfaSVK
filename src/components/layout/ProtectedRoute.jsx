@@ -25,35 +25,30 @@ export function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/superadmin" replace />;
   }
 
-  // Спец-проверки только для сотрудников (не админов и не суперадминов)
-  if (user.role !== 'admin' && user.role !== 'superadmin') {
+  // 1. Проверка онбординга (для всех, кроме суперадмина)
+  if (user.role !== 'superadmin') {
     const path = location.pathname;
 
-    // 1. Проверка онбординга (высший приоритет)
-    // Если агент не прошел онбординг или не сменил пароль — можно только /onboarding
     if (!user.onboarded || !user.passwordChanged) {
       if (path !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
       }
-      // Если на /onboarding — показываем (даже если стажер)
       return children ? children : <Outlet />;
     }
 
-    // Дальше: user.onboarded === true && user.passwordChanged === true
-
-    // Если прошел онбординг, но пытается зайти на /onboarding -> домой
     if (path === '/onboarding') {
-      return <Navigate to="/" replace />;
+      return <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace />;
     }
 
-    // 2. Проверка статуса стажера
-    if (user.status === 'На обучении' && path !== '/training') {
-      return <Navigate to="/training" replace />;
-    }
+    // 2. Проверка статуса стажера (только для обычных сотрудников)
+    if (user.role === 'employee' || user.role === 'agent') {
+      if (user.status === 'На обучении' && path !== '/training') {
+        return <Navigate to="/training" replace />;
+      }
 
-    // Если НЕ стажер, но пытается зайти на /training
-    if (user.status !== 'На обучении' && path === '/training') {
-      return <Navigate to="/" replace />;
+      if (user.status !== 'На обучении' && path === '/training') {
+        return <Navigate to="/" replace />;
+      }
     }
   }
 

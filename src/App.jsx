@@ -12,6 +12,7 @@ import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LinksPage } from './pages/LinksPage';
 import { SchedulePage } from './pages/SchedulePage';
+import { ColleaguesPage } from './pages/ColleaguesPage';
 import { PlaceholderPages } from './pages/PlaceholderPages';
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/colleagues" element={<ColleaguesPage />} />
           
           <Route path="/links" element={<LinksPage />} />
           <Route path="/pending" element={<PlaceholderPages type="pending" />} />
