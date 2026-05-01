@@ -10,6 +10,7 @@ import { MeetingPage } from './pages/MeetingPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LinksPage } from './pages/LinksPage';
+import { SchedulePage } from './pages/SchedulePage';
 import { PlaceholderPages } from './pages/PlaceholderPages';
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/leaderboard" replace />} />
           <Route path="/meeting" element={<MeetingPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           
           <Route path="/links" element={<LinksPage />} />

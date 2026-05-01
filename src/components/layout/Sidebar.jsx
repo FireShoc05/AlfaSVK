@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   ExternalLink,
+  CalendarDays,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -17,6 +18,7 @@ import { useSettingsStore } from '../../store/useSettingsStore';
 const mainNav = [
   { to: '/meeting', icon: CalendarPlus, label: 'Новая встреча' },
   { to: '/leaderboard', icon: Trophy, label: 'Лидеры' },
+  { to: '/schedule', icon: CalendarDays, label: 'График' },
   { to: '/profile', icon: User, label: 'Профиль' },
 ];
 

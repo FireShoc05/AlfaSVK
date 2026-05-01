@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2, FileX, Link2, Save, Trophy, Package, BarChart3 } from 'lucide-react';
+import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2, FileX, Link2, Save, Trophy, Package, BarChart3, CalendarDays } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useUsersStore } from '../../store/useUsersStore';
 import { useRejectionsStore } from '../../store/useRejectionsStore';
@@ -10,6 +10,7 @@ import { AdminProductsTab } from './AdminProductsTab';
 import { AdminLeaderboardTab } from './AdminLeaderboardTab';
 import { AdminStatisticsTab } from './AdminStatisticsTab';
 import { AdminMeetingsTab } from './AdminMeetingsTab';
+import { AdminScheduleTab } from './AdminScheduleTab';
 import '../../styles/admin.css';
 
 // Утилиты для генерации
@@ -162,6 +163,12 @@ export function AdminDashboard() {
           onClick={() => setActiveTab('meetings')}
         >
           <FileX size={16} /> Встречи
+        </button>
+        <button
+          className={`admin-tabs__tab ${activeTab === 'schedule' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('schedule')}
+        >
+          <CalendarDays size={16} /> График
         </button>
         <button
           className={`admin-tabs__tab ${activeTab === 'links' ? 'admin-tabs__tab--active' : ''}`}
@@ -317,6 +324,9 @@ export function AdminDashboard() {
 
         {/* MEETINGS TAB */}
         {activeTab === 'meetings' && <AdminMeetingsTab />}
+
+        {/* SCHEDULE TAB */}
+        {activeTab === 'schedule' && <AdminScheduleTab />}
 
         {/* LINKS TAB */}
         {activeTab === 'links' && (

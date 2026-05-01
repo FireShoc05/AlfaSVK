@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { CalendarPlus, Trophy, User } from 'lucide-react';
+import { CalendarPlus, Trophy, User, CalendarDays } from 'lucide-react';
 
 const navItems = [
   { to: '/meeting', icon: CalendarPlus, label: 'Встреча' },
   { to: '/leaderboard', icon: Trophy, label: 'Лидеры' },
+  { to: '/schedule', icon: CalendarDays, label: 'График' },
   { to: '/profile', icon: User, label: 'Профиль' },
 ];
 
