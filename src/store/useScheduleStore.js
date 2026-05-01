@@ -11,8 +11,10 @@ export const useScheduleStore = create((set, get) => ({
   fetchSchedules: async (month, userId = null) => {
     let query = supabase.from('schedules').select('*, users(fullName, username)');
     
-    // Filter by month using like (since date is YYYY-MM-DD)
-    query = query.like('date', `${month}-%`);
+    // Filter by month using precise date bounds
+    const [year, m] = month.split('-');
+    const lastDay = new Date(parseInt(year), parseInt(m), 0).getDate();
+    query = query.gte('date', `${month}-01`).lte('date', `${month}-${lastDay}`);
     
     if (userId) {
       query = query.eq('userId', userId);
@@ -43,12 +45,15 @@ export const useScheduleStore = create((set, get) => ({
   saveMonthSchedule: async (userId, month, shiftsToUpsert, datesToDelete) => {
     try {
       // Delete all non-extra shifts for this user in this month
-      // month is 'YYYY-MM', we can use .like('date', `${month}-%`)
+      const [year, m] = month.split('-');
+      const lastDay = new Date(parseInt(year), parseInt(m), 0).getDate();
+      
       const { error: delError } = await supabase
         .from('schedules')
         .delete()
         .eq('userId', userId)
-        .like('date', `${month}-%`)
+        .gte('date', `${month}-01`)
+        .lte('date', `${month}-${lastDay}`)
         .eq('is_extra', false);
 
       if (delError) {
