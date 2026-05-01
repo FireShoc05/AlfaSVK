@@ -304,14 +304,18 @@ export function AdminDashboard() {
                         {u.onboarded ? '✅ Да' : '⏳ Нет'}
                       </td>
                       <td style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        <Button variant={u.role === 'admin' ? 'outline' : 'primary'} size="sm" onClick={() => toggleAdminRole(u)}>
-                          <ShieldAlert size={14} /> {u.role === 'admin' ? 'Забрать права' : 'Дать админа'}
-                        </Button>
+                        {u.id !== user.id && (
+                          <>
+                            <Button variant={u.role === 'admin' ? 'outline' : 'primary'} size="sm" onClick={() => toggleAdminRole(u)}>
+                              <ShieldAlert size={14} /> {u.role === 'admin' ? 'Забрать права' : 'Дать админа'}
+                            </Button>
+                            <Button variant="outline-danger" size="sm" onClick={() => handleDelete(u)}>
+                              <Trash2 size={14} /> 
+                            </Button>
+                          </>
+                        )}
                         <Button variant="ghost" size="sm" onClick={() => handleRegenerate(u.id)}>
                           <KeyRound size={14} /> Пароль
-                        </Button>
-                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(u)}>
-                          <Trash2 size={14} /> 
                         </Button>
                       </td>
                     </tr>
