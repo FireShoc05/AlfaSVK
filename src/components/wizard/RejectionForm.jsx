@@ -132,23 +132,36 @@ export function RejectionForm({ onBack }) {
       <GlassCard className="rejection-card">
         {/* Meeting ID */}
         <div className="rejection-field">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <label className="rejection-field__label" style={{ marginBottom: 0 }}>ID встречи</label>
+          <label className="rejection-field__label">ID встречи</label>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              type="text"
+              className="rejection-field__input"
+              placeholder="Введите ID встречи"
+              value={meetingId}
+              onChange={(e) => setMeetingId(e.target.value)}
+              style={{ flex: 1, margin: 0 }}
+            />
             <button
               type="button"
               onClick={() => setMeetingId('ЗАБЫЛ')}
-              style={{ fontSize: '12px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--glass-border)',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                fontSize: '16px',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
             >
-              Забыл id
+              Забыл ID
             </button>
           </div>
-          <input
-            type="text"
-            className="rejection-field__input"
-            placeholder="Введите ID встречи"
-            value={meetingId}
-            onChange={(e) => setMeetingId(e.target.value)}
-          />
         </div>
 
         {/* Rejection type */}

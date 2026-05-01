@@ -456,23 +456,35 @@ export function WizardContainer({ onBack }) {
 
       {/* Meeting ID field */}
       <div className="wizard-meeting-id">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <label className="wizard-meeting-id__label" style={{ marginBottom: 0 }}>ID встречи</label>
+        <label className="wizard-meeting-id__label">ID встречи</label>
+        <div style={{ display: 'flex', flex: 1, gap: '8px', alignItems: 'center' }}>
+          <input
+            type="text"
+            className="wizard-meeting-id__input"
+            placeholder="Введите ID встречи"
+            value={meetingId}
+            onChange={(e) => setMeetingId(e.target.value)}
+          />
           <button
             type="button"
             onClick={() => setMeetingId('ЗАБЫЛ')}
-            style={{ fontSize: '12px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            style={{
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--glass-border)',
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
           >
-            Забыл id
+            Забыл ID
           </button>
         </div>
-        <input
-          type="text"
-          className="wizard-meeting-id__input"
-          placeholder="Введите ID встречи"
-          value={meetingId}
-          onChange={(e) => setMeetingId(e.target.value)}
-        />
       </div>
 
       <StepIndicator current={currentStep} />
