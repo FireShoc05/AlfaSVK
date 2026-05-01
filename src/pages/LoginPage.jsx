@@ -35,12 +35,16 @@ export function LoginPage() {
       return;
     }
 
-    // 2. Поиск в локальной базе
     const foundUser = await findUser(trimmedLogin, trimmedPassword);
     if (foundUser) {
       login(foundUser);
-      // ProtectedRoute дальше сам раскидает пользователя (на onboarding, training или meeting)
-      navigate('/');
+      if (foundUser.role === 'superadmin') {
+        navigate('/superadmin');
+      } else if (foundUser.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } else {
       setError('Неверный логин или пароль');
     }
