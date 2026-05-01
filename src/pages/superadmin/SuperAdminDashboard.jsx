@@ -68,8 +68,12 @@ export function SuperAdminDashboard() {
   const handleAddGroup = async (e) => {
     e.preventDefault();
     if (!newGroupName.trim()) return;
-    await addGroup(newGroupName.trim());
-    setNewGroupName('');
+    const result = await addGroup(newGroupName.trim());
+    if (!result.success) {
+      alert('Ошибка при создании группы: ' + (result.error?.message || JSON.stringify(result.error)));
+    } else {
+      setNewGroupName('');
+    }
   };
 
   const handleDeleteGroup = async (group) => {
@@ -85,15 +89,19 @@ export function SuperAdminDashboard() {
     const newLogin = generateLogin(newManagerName);
     const newPassword = generatePassword();
 
-    await addManager({
+    const result = await addManager({
       fullName: newManagerName.trim(),
       username: newLogin,
       tempPassword: newPassword,
       group_id: newManagerGroup || null,
     });
 
-    setNewManagerName('');
-    setNewManagerGroup('');
+    if (!result.success) {
+      alert('Ошибка при создании начальника: ' + (result.error?.message || JSON.stringify(result.error)));
+    } else {
+      setNewManagerName('');
+      setNewManagerGroup('');
+    }
   };
 
   const handleDeleteManager = async (manager) => {
