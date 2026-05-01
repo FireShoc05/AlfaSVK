@@ -457,7 +457,7 @@ export function WizardContainer({ onBack }) {
       {/* Meeting ID field */}
       <div className="wizard-meeting-id">
         <label className="wizard-meeting-id__label">ID встречи</label>
-        <div style={{ display: 'flex', flex: 1, gap: '8px', alignItems: 'center' }}>
+        <div className="meeting-id-group">
           <input
             type="text"
             className="wizard-meeting-id__input"

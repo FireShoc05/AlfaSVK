@@ -133,7 +133,7 @@ export function RejectionForm({ onBack }) {
         {/* Meeting ID */}
         <div className="rejection-field">
           <label className="rejection-field__label">ID встречи</label>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div className="meeting-id-group">
             <input
               type="text"
               className="rejection-field__input"
