@@ -226,28 +226,42 @@
 
 @media (max-width: 640px) {
   .calendar-day {
-    padding: 2px;
+    padding: 1px;
   }
   .calendar-grid {
-    gap: 2px;
+    gap: 1px;
   }
   .calendar-day__num {
-    top: 2px;
-    right: 4px;
-    font-size: 11px;
+    top: 1px;
+    right: 2px;
+    font-size: 10px;
+    line-height: 1;
   }
   .calendar-day__time {
-    font-size: 9px;
+    font-size: 8px;
     white-space: nowrap;
     letter-spacing: -0.5px;
+    line-height: 1.1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .time-sep {
+    display: none;
   }
   .calendar-day__off {
-    font-size: 9px;
+    font-size: 8px;
+    line-height: 1;
   }
   .calendar-day__badge {
-    font-size: 8px;
-    padding: 2px 4px;
+    font-size: 7px;
+    padding: 1px 2px;
     margin-top: 2px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
   .calendar-header__title {
     font-size: var(--font-base);
@@ -259,7 +273,11 @@
     flex-direction: column;
   }
   .calendar-day__shift {
-    margin-top: 8px;
+    margin-top: 12px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }
 

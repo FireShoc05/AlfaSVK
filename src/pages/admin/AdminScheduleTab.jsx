@@ -390,7 +390,9 @@ function PersonalSchedule() {
       content = (
         <div className="calendar-day__shift">
           <span className="calendar-day__time">
-            {shift.start_time.replace(/^0/, '')}-{shift.end_time.replace(/^0/, '')}
+            <span className="time-start">{shift.start_time.replace(/^0/, '')}</span>
+            <span className="time-sep">-</span>
+            <span className="time-end">{shift.end_time.replace(/^0/, '')}</span>
           </span>
           {shift.is_extra && <span className="calendar-day__badge calendar-day__badge--extra">Доп. смена</span>}
         </div>
