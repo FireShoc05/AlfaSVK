@@ -11,10 +11,12 @@ export function AdminScheduleTab() {
   
   return (
     <div className="admin-tab">
-      <div className="admin-header">
+      <div style={{ marginBottom: '24px' }}>
         <div>
-          <h2 className="admin-header__title"><CalendarIcon /> Управление графиками</h2>
-          <p className="admin-header__subtitle">Контроль и редактирование смен сотрудников</p>
+          <h2 style={{ fontSize: 'var(--font-xl)', fontWeight: '800', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CalendarIcon size={24} color="var(--accent)" /> Управление графиками
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Контроль и редактирование смен сотрудников</p>
         </div>
       </div>
       

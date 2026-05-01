@@ -163,6 +163,40 @@
   border-bottom-color: var(--accent);
 }
 
+/* --- Admin Sub Tabs (e.g. Schedule) --- */
+.admin-tabs-sub {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-md) 0 0 0;
+  margin-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-tabs-sub__btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-base);
+  margin-bottom: -1px;
+}
+
+.admin-tabs-sub__btn:hover {
+  color: var(--text-secondary);
+}
+
+.admin-tabs-sub__btn--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 /* --- Admin Link Management --- */
 .admin-link-row {
   display: flex;
