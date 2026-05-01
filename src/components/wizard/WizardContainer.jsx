@@ -4,7 +4,7 @@ import '../../styles/wizard.css';
 import { useWizardStore } from '../../store/useWizardStore';
 import { useMeetingsStore } from '../../store/useMeetingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
-import { MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES } from '../../data/products';
+import { useSettingsStore } from '../../store/useSettingsStore';
 import { Button, GlassCard, Toggle, Checkbox, Stepper, Modal } from '../ui';
 import { formatCurrency, generateMeetingJSON, calculateTotal } from '../../utils/formatters';
 import {
@@ -80,6 +80,7 @@ function StickyBank({ total }) {
 /* ─── Step 1: Основные продукты ────────────── */
 function Step1() {
   const { mainProducts, toggleMainProduct, setMainProductOption } = useWizardStore();
+  const MAIN_PRODUCTS = useSettingsStore((s) => s.productsMain);
 
   return (
     <div>
@@ -130,6 +131,7 @@ function Step1() {
 /* ─── Step 2: Доп. продукты ────────────────── */
 function Step2() {
   const { crossProducts, toggleCrossProduct, setCrossProductOption, setCrossCardOption, setCrossProductQuantity } = useWizardStore();
+  const CROSS_PRODUCTS = useSettingsStore((s) => s.productsCross);
 
   return (
     <div>
@@ -212,6 +214,7 @@ function Step2() {
 /* ─── Step 3: Услуги ───────────────────────── */
 function Step3() {
   const { services, toggleService, toggleExpandableService, setServiceOption } = useWizardStore();
+  const SERVICES = useSettingsStore((s) => s.productsServices);
 
   return (
     <div>
@@ -285,7 +288,10 @@ function Step3() {
 /* ─── Step 4: Итоги ────────────────────────── */
 function Step4({ onComplete, onDelete }) {
   const state = useWizardStore();
-  const total = calculateTotal(state);
+  const MAIN_PRODUCTS = useSettingsStore((s) => s.productsMain);
+  const CROSS_PRODUCTS = useSettingsStore((s) => s.productsCross);
+  const SERVICES = useSettingsStore((s) => s.productsServices);
+  const total = calculateTotal(state, MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES);
 
   const mainSelected = MAIN_PRODUCTS.filter((p) => state.mainProducts[p.id]?.selected);
   const crossSelected = CROSS_PRODUCTS.filter((p) => state.crossProducts[p.id]?.selected);
@@ -403,14 +409,22 @@ function Step4({ onComplete, onDelete }) {
 export function WizardContainer({ onBack }) {
   const store = useWizardStore();
   const { currentStep, nextStep, prevStep, resetWizard } = store;
-  const total = calculateTotal(store);
+  const MAIN_PRODUCTS = useSettingsStore((s) => s.productsMain);
+  const CROSS_PRODUCTS = useSettingsStore((s) => s.productsCross);
+  const SERVICES = useSettingsStore((s) => s.productsServices);
+  const fetchProducts = useSettingsStore((s) => s.fetchProducts);
+  const total = calculateTotal(store, MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES);
   const addMeeting = useMeetingsStore((s) => s.addMeeting);
   const user = useAuthStore((s) => s.user);
   const [showSuccess, setShowSuccess] = useState(false);
   const [meetingId, setMeetingId] = useState('');
 
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
   const handleComplete = async () => {
-    const json = generateMeetingJSON(store, user?.fullName || 'АДМИН', meetingId.trim());
+    const json = generateMeetingJSON(store, user?.fullName || 'АДМИН', meetingId.trim(), MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES);
     console.log('📦 Meeting JSON:', JSON.stringify(json, null, 2));
     await addMeeting(json, user?.id);
     setShowSuccess(true);

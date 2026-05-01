@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2, FileX, Link2, Save } from 'lucide-react';
+import { ShieldAlert, LogOut, UserPlus, KeyRound, Copy, Check, Trash2, FileX, Link2, Save, Trophy, Package } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useUsersStore } from '../../store/useUsersStore';
 import { useRejectionsStore } from '../../store/useRejectionsStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { GlassCard, Button, InputGroup, Badge } from '../../components/ui';
+import { AdminProductsTab } from './AdminProductsTab';
+import { AdminLeaderboardTab } from './AdminLeaderboardTab';
 import '../../styles/admin.css';
 
 // Утилиты для генерации
@@ -166,6 +168,18 @@ export function AdminDashboard() {
           onClick={() => setActiveTab('links')}
         >
           <Link2 size={16} /> Ссылки
+        </button>
+        <button
+          className={`admin-tabs__tab ${activeTab === 'leaderboard' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('leaderboard')}
+        >
+          <Trophy size={16} /> Лидерборд
+        </button>
+        <button
+          className={`admin-tabs__tab ${activeTab === 'products' ? 'admin-tabs__tab--active' : ''}`}
+          onClick={() => setActiveTab('products')}
+        >
+          <Package size={16} /> Товары
         </button>
       </div>
 
@@ -495,6 +509,12 @@ export function AdminDashboard() {
             </div>
           </GlassCard>
         )}
+
+        {/* LEADERBOARD TAB */}
+        {activeTab === 'leaderboard' && <AdminLeaderboardTab />}
+
+        {/* PRODUCTS TAB */}
+        {activeTab === 'products' && <AdminProductsTab />}
       </div>
     </div>
   );

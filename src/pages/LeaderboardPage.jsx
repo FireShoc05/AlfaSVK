@@ -4,59 +4,88 @@ import { Tabs } from '../components/ui';
 import { Trophy } from 'lucide-react';
 import { useMeetingsStore } from '../store/useMeetingsStore';
 import { useUsersStore } from '../store/useUsersStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { formatCurrency } from '../utils/formatters';
-
-const tabs = [
-  { id: 'earnings', label: 'Заработок' },
-  { id: 'bs', label: 'Продажи БС' },
-  { id: 'kl', label: 'Продажи КЛ' },
-];
 
 const medals = ['🥇', '🥈', '🥉'];
 const medalClasses = ['leaderboard__item--gold', 'leaderboard__item--silver', 'leaderboard__item--bronze'];
 
 export function LeaderboardPage() {
-  const [activeTab, setActiveTab] = useState('earnings');
-  
   const { fetchAllMeetings, getLeaderboardData } = useMeetingsStore();
   const { users, fetchUsers } = useUsersStore();
+  const { leaderboardTabs, fetchLeaderboardTabs } = useSettingsStore();
+
+  const [activeTab, setActiveTab] = useState('');
 
   useEffect(() => {
     fetchUsers();
     fetchAllMeetings();
-  }, [fetchUsers, fetchAllMeetings]);
+    fetchLeaderboardTabs();
+  }, [fetchUsers, fetchAllMeetings, fetchLeaderboardTabs]);
 
+  // Set default active tab when tabs load
+  useEffect(() => {
+    if (leaderboardTabs.length > 0 && !activeTab) {
+      setActiveTab(leaderboardTabs[0].id);
+    }
+  }, [leaderboardTabs, activeTab]);
+
+  // Build tabs for the Tabs component
+  const tabs = leaderboardTabs.map((t) => ({ id: t.id, label: t.label }));
+
+  // Find current tab config
+  const currentTab = leaderboardTabs.find((t) => t.id === activeTab);
+
+  // Build leaderboard list based on current tab type
   const getLeaderboardList = () => {
-    const list = users.map(u => {
-       const stats = getLeaderboardData(u.id);
-       return {
-          id: u.id,
-          name: u.fullName || u.username,
-          role: u.role,
-          earnings: stats.earnings,
-          bsSales: stats.bsSales,
-          klSales: stats.klSales
-       };
-    });
-    
-    return list.sort((a, b) => {
-       if (activeTab === 'earnings') return b.earnings - a.earnings;
-       if (activeTab === 'bs') return b.bsSales - a.bsSales;
-       if (activeTab === 'kl') return b.klSales - a.klSales;
-       return 0;
-    });
+    if (!currentTab) return [];
+
+    return users.map((u) => {
+      const stats = getLeaderboardData(u.id);
+      let value = 0;
+
+      if (currentTab.type === 'earnings') {
+        value = stats.earnings;
+      } else if (currentTab.type === 'product') {
+        // Count sales of a specific product by name
+        value = getProductSalesCount(u.id, currentTab.productName);
+      }
+
+      return {
+        id: u.id,
+        name: u.fullName || u.username,
+        value,
+      };
+    })
+    .filter((item) => item.value > 0)
+    .sort((a, b) => b.value - a.value);
   };
 
-  const list = getLeaderboardList().filter(item => {
-      // Filter out admins if needed, or keep everyone who has > 0
-      if (activeTab === 'earnings') return item.earnings > 0;
-      if (activeTab === 'bs') return item.bsSales > 0;
-      if (activeTab === 'kl') return item.klSales > 0;
-      return false;
-  });
+  /**
+   * Count how many times a user sold a specific product/service by name.
+   * Searches through all meetings for that user.
+   */
+  const getProductSalesCount = (userId, productName) => {
+    const meetings = useMeetingsStore.getState()._getUserMeetings(userId);
+    let count = 0;
+
+    meetings.forEach((m) => {
+      (m?.products || []).forEach((p) => {
+        // Match by base name (strip "Кросс Дет #1" -> "Кросс Дет")
+        const baseName = p.name?.replace(/ #\d+$/, '');
+        if (baseName === productName || p.name === productName) {
+          count += p.quantity || 1;
+        }
+      });
+    });
+
+    return count;
+  };
+
+  const list = getLeaderboardList();
 
   const formatValue = (val) => {
-    if (activeTab === 'earnings') return formatCurrency(val);
+    if (currentTab?.type === 'earnings') return formatCurrency(val);
     return val;
   };
 
@@ -70,7 +99,9 @@ export function LeaderboardPage() {
         <p className="page-header__subtitle">Лидеры по результатам работы</p>
       </div>
 
-      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      {tabs.length > 0 && (
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
 
       <div className="leaderboard__list">
         {list.length > 0 ? (
@@ -81,7 +112,7 @@ export function LeaderboardPage() {
               </div>
               <div className="leaderboard__name">{item.name}</div>
               <div className="leaderboard__value">
-                {formatValue(activeTab === 'earnings' ? item.earnings : activeTab === 'bs' ? item.bsSales : item.klSales)}
+                {formatValue(item.value)}
               </div>
             </div>
           ))
