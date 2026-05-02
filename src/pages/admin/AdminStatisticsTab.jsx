@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart3, Search, ChevronDown, ChevronUp, Calendar, Users, Package, CreditCard, Wrench, XCircle, CheckCircle } from 'lucide-react';
+import { BarChart3, Search, ChevronDown, ChevronUp, Calendar, Users, Package, CreditCard, Wrench, XCircle, CheckCircle, Download } from 'lucide-react';
 import { useMeetingsStore } from '../../store/useMeetingsStore';
 import { useRejectionsStore } from '../../store/useRejectionsStore';
 import { useUsersStore } from '../../store/useUsersStore';
@@ -7,6 +7,7 @@ import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { GlassCard, Button, Badge } from '../../components/ui';
 import { formatCurrency } from '../../utils/formatters';
+import { generateExcelReport } from '../../utils/generateExcelReport';
 import '../../styles/admin.css';
 
 // Helpers
@@ -32,6 +33,7 @@ export function AdminStatisticsTab() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedUser, setExpandedUser] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   // Initial fetch
   useEffect(() => {
@@ -152,6 +154,26 @@ export function AdminStatisticsTab() {
     return name.includes(term) || login.includes(term);
   });
 
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const allMeetings = Object.values(meetingsByUser).flat();
+      generateExcelReport(
+        allMeetings,
+        users,
+        productsMain,
+        productsCross,
+        productsServices,
+        selectedDate,
+        rejections
+      );
+    } catch (err) {
+      console.error('Excel export error:', err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="admin-statistics-tab">
       
@@ -166,15 +188,26 @@ export function AdminStatisticsTab() {
               Выберите дату для просмотра подробной информации по всем продажам и сотрудникам.
             </p>
           </div>
-          <div className="admin-date-picker-wrapper">
-            <label className="admin-date-picker-label"><Calendar size={14}/> Дата:</label>
-            <input 
-              type="date" 
-              className="admin-date-picker-input"
-              value={selectedDate}
-              onChange={e => setSelectedDate(e.target.value)}
-              max={new Date().toLocaleDateString('en-CA')}
-            />
+          <div className="admin-date-picker-wrapper" style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', flexWrap: 'wrap' }}>
+            <div>
+              <label className="admin-date-picker-label"><Calendar size={14}/> Дата:</label>
+              <input 
+                type="date" 
+                className="admin-date-picker-input"
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                max={new Date().toLocaleDateString('en-CA')}
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              disabled={exporting}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              <Download size={14} /> {exporting ? 'Экспорт...' : 'Excel отчёт'}
+            </Button>
           </div>
         </div>
 

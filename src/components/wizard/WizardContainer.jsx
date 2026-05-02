@@ -79,7 +79,7 @@ function StickyBank({ total }) {
 
 /* ─── Step 1: Основные продукты ────────────── */
 function Step1() {
-  const { mainProducts, toggleMainProduct, setMainProductOption } = useWizardStore();
+  const { mainProducts, toggleMainProduct, setMainProductOption, setMainCardOption, setMainProductQuantity } = useWizardStore();
   const MAIN_PRODUCTS = useSettingsStore((s) => s.productsMain);
 
   return (
@@ -89,34 +89,86 @@ function Step1() {
         {MAIN_PRODUCTS.map((product) => {
           const selected = mainProducts[product.id]?.selected;
           const isToggle = product.type === 'toggle';
+          const hasStepper = !!product.hasStepper;
+          const sel = mainProducts[product.id];
 
+          // Non-stepper product card
+          if (!hasStepper) {
+            return (
+              <div
+                key={product.id}
+                className={`product-card ${selected ? 'product-card--selected' : ''}`}
+                onClick={() => toggleMainProduct(product.id, false)}
+              >
+                <div className="product-card__check">
+                  <Check size={14} />
+                </div>
+                <div className="product-card__icon">
+                  {isToggle ? <Smartphone size={22} /> : <CreditCard size={22} />}
+                </div>
+                <div className="product-card__name">{product.name}</div>
+                <div className="product-card__price">{formatCurrency(product.price)}</div>
+
+                {selected && !isToggle && product.options.length > 0 && (
+                  <div className="product-options" onClick={(e) => e.stopPropagation()}>
+                    <div className="product-options__title">Опции:</div>
+                    {product.options.map((opt) => (
+                      <Checkbox
+                        key={opt.id}
+                        id={`${product.id}-${opt.id}`}
+                        checked={!!mainProducts[product.id]?.options[opt.id]}
+                        onChange={(val) => setMainProductOption(product.id, opt.id, val)}
+                        label={opt.label}
+                        value={opt.bonus > 0 ? `+${opt.bonus}` : '+0'}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          // Stepper product (like cross stepper but in main category)
           return (
-            <div
-              key={product.id}
-              className={`product-card ${selected ? 'product-card--selected' : ''}`}
-              onClick={() => toggleMainProduct(product.id)}
-            >
-              <div className="product-card__check">
-                <Check size={14} />
+            <div key={product.id} className={`cross-card ${selected ? 'cross-card--selected' : ''}`}>
+              <div className="cross-card__header">
+                <div>
+                  <div className="cross-card__name">{product.name}</div>
+                  <div className="cross-card__price">{formatCurrency(product.price)} за шт.</div>
+                </div>
+                <Toggle
+                  id={`main-${product.id}`}
+                  checked={!!selected}
+                  onChange={() => toggleMainProduct(product.id, true)}
+                />
               </div>
-              <div className="product-card__icon">
-                {isToggle ? <Smartphone size={22} /> : <CreditCard size={22} />}
-              </div>
-              <div className="product-card__name">{product.name}</div>
-              <div className="product-card__price">{formatCurrency(product.price)}</div>
 
-              {selected && !isToggle && product.options.length > 0 && (
-                <div className="product-options" onClick={(e) => e.stopPropagation()}>
-                  <div className="product-options__title">Опции:</div>
-                  {product.options.map((opt) => (
-                    <Checkbox
-                      key={opt.id}
-                      id={`${product.id}-${opt.id}`}
-                      checked={!!mainProducts[product.id]?.options[opt.id]}
-                      onChange={(val) => setMainProductOption(product.id, opt.id, val)}
-                      label={opt.label}
-                      value={opt.bonus > 0 ? `+${opt.bonus}` : '+0'}
+              {selected && (
+                <div className="cross-card__options">
+                  <div className="cross-card__stepper">
+                    <span className="cross-card__stepper-label">Количество:</span>
+                    <Stepper
+                      value={sel?.quantity || 0}
+                      onChange={(val) => setMainProductQuantity(product.id, val)}
+                      min={0}
+                      max={product.maxQty || 5}
                     />
+                  </div>
+
+                  {(sel?.cards || []).map((card, cardIndex) => (
+                    <div key={cardIndex} className="cross-card__card-group">
+                      <div className="cross-card__card-label">Штука {cardIndex + 1}</div>
+                      {product.options.map((opt) => (
+                        <Checkbox
+                          key={opt.id}
+                          id={`${product.id}-card${cardIndex}-${opt.id}`}
+                          checked={!!card[opt.id]}
+                          onChange={(val) => setMainCardOption(product.id, cardIndex, opt.id, val)}
+                          label={opt.label}
+                          value={opt.bonus > 0 ? `+${opt.bonus}` : '+0'}
+                        />
+                      ))}
+                    </div>
                   ))}
                 </div>
               )}
@@ -213,7 +265,7 @@ function Step2() {
 
 /* ─── Step 3: Услуги ───────────────────────── */
 function Step3() {
-  const { services, toggleService, toggleExpandableService, setServiceOption } = useWizardStore();
+  const { services, toggleService, toggleExpandableService, setServiceOption, setServiceCardOption, setServiceQuantity } = useWizardStore();
   const SERVICES = useSettingsStore((s) => s.productsServices);
 
   return (
@@ -222,8 +274,10 @@ function Step3() {
       {SERVICES.map((service) => {
         const isToggleType = service.type === 'toggle';
         const isExpandable = service.type === 'expandable';
+        const hasStepper = !!service.hasStepper;
 
-        if (isToggleType) {
+        // Toggle service (simple on/off, no stepper)
+        if (isToggleType && !hasStepper) {
           const isActive = !!services[service.id];
           return (
             <div key={service.id} className={`service-card ${isActive ? 'service-card--active' : ''}`}>
@@ -240,7 +294,44 @@ function Step3() {
           );
         }
 
-        if (isExpandable) {
+        // Toggle service with stepper (multiple instances, no options per instance)
+        if (isToggleType && hasStepper) {
+          const state = services[service.id];
+          const isActive = !!state?.active;
+
+          return (
+            <div key={service.id} className={`cross-card ${isActive ? 'cross-card--selected' : ''}`}>
+              <div className="cross-card__header">
+                <div>
+                  <div className="cross-card__name">{service.name}</div>
+                  <div className="cross-card__price">+{formatCurrency(service.bonus)} за шт.</div>
+                </div>
+                <Toggle
+                  id={`service-${service.id}`}
+                  checked={isActive}
+                  onChange={() => toggleExpandableService(service.id, true)}
+                />
+              </div>
+
+              {isActive && (
+                <div className="cross-card__options">
+                  <div className="cross-card__stepper">
+                    <span className="cross-card__stepper-label">Количество:</span>
+                    <Stepper
+                      value={state?.quantity || 0}
+                      onChange={(val) => setServiceQuantity(service.id, val)}
+                      min={0}
+                      max={service.maxQty || 5}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // Expandable service WITHOUT stepper (original behavior)
+        if (isExpandable && !hasStepper) {
           const state = services[service.id];
           const isActive = !!state?.active;
 
@@ -254,7 +345,7 @@ function Step3() {
                 <Toggle
                   id={`service-${service.id}`}
                   checked={isActive}
-                  onChange={() => toggleExpandableService(service.id)}
+                  onChange={() => toggleExpandableService(service.id, false)}
                 />
               </div>
 
@@ -273,6 +364,58 @@ function Step3() {
                       />
                     );
                   })}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // Expandable service WITH stepper
+        if (isExpandable && hasStepper) {
+          const state = services[service.id];
+          const isActive = !!state?.active;
+
+          return (
+            <div key={service.id} className={`cross-card ${isActive ? 'cross-card--selected' : ''}`}>
+              <div className="cross-card__header">
+                <div>
+                  <div className="cross-card__name">{service.name}</div>
+                  <div className="cross-card__price">{formatCurrency(service.bonus || 0)} базовая</div>
+                </div>
+                <Toggle
+                  id={`service-${service.id}`}
+                  checked={isActive}
+                  onChange={() => toggleExpandableService(service.id, true)}
+                />
+              </div>
+
+              {isActive && (
+                <div className="cross-card__options">
+                  <div className="cross-card__stepper">
+                    <span className="cross-card__stepper-label">Количество:</span>
+                    <Stepper
+                      value={state?.quantity || 0}
+                      onChange={(val) => setServiceQuantity(service.id, val)}
+                      min={0}
+                      max={service.maxQty || 5}
+                    />
+                  </div>
+
+                  {(state?.cards || []).map((card, cardIndex) => (
+                    <div key={cardIndex} className="cross-card__card-group">
+                      <div className="cross-card__card-label">Штука {cardIndex + 1}</div>
+                      {service.options?.map((opt) => (
+                        <Checkbox
+                          key={opt.id}
+                          id={`service-${service.id}-card${cardIndex}-${opt.id}`}
+                          checked={!!card[opt.id]}
+                          onChange={(val) => setServiceCardOption(service.id, cardIndex, opt.id, val)}
+                          label={opt.label}
+                          value={opt.bonus > 0 ? `+${opt.bonus}` : '+0'}
+                        />
+                      ))}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -309,6 +452,31 @@ function Step4({ onComplete, onDelete }) {
             <div className="receipt__section-title">Основные продукты</div>
             {mainSelected.map((product) => {
               const sel = state.mainProducts[product.id];
+
+              // Stepper main product
+              if (product.hasStepper) {
+                const count = sel.quantity || 1;
+                const cards = sel.cards || [];
+                let earned = 0;
+                cards.forEach((card) => {
+                  earned += product.price;
+                  product.options.forEach((o) => {
+                    if (card[o.id]) earned += o.bonus;
+                  });
+                });
+                return (
+                  <div key={product.id}>
+                    <div className="receipt__item">
+                      <span className="receipt__item-name">
+                        {product.name} {count > 1 ? `×${count}` : ''}
+                      </span>
+                      <span className="receipt__item-value">{formatCurrency(earned)}</span>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Non-stepper main product
               let earned = product.price;
               product.options.forEach((o) => { if (sel.options[o.id]) earned += o.bonus; });
               const activeOpts = product.options.filter((o) => sel.options[o.id]).map((o) => o.label);
@@ -371,15 +539,30 @@ function Step4({ onComplete, onDelete }) {
               let earned = service.bonus;
               const sel = state.services[service.id];
               
-              if (service.type === 'expandable' && sel?.active) {
+              if (service.hasStepper && sel?.active) {
+                // Stepper service: bonus * quantity + card options
+                const count = sel.quantity || 1;
+                earned = service.bonus * count;
+                if (sel.cards) {
+                  sel.cards.forEach((card) => {
+                    service.options?.forEach((o) => {
+                      if (card[o.id]) earned += o.bonus;
+                    });
+                  });
+                }
+              } else if (service.type === 'expandable' && sel?.active) {
                 service.options?.forEach((o) => {
                   if (sel.options?.[o.id]) earned += o.bonus;
                 });
               }
 
+              const count = sel?.quantity || 1;
+
               return (
                 <div key={service.id} className="receipt__item">
-                  <span className="receipt__item-name">{service.name}</span>
+                  <span className="receipt__item-name">
+                    {service.name} {service.hasStepper && count > 1 ? `×${count}` : ''}
+                  </span>
                   <span className="receipt__item-value">{formatCurrency(earned)}</span>
                 </div>
               );

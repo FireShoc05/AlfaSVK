@@ -36,6 +36,13 @@ const CATEGORY_META = {
   },
 };
 
+// Label for hasStepper checkbox by category
+const STEPPER_LABELS = {
+  main: 'Множественный (можно добавить несколько штук)',
+  cross: null, // cross uses type selector instead
+  services: 'Множественный (можно добавить несколько штук)',
+};
+
 /* ── Empty product templates ─────────────────── */
 
 function newMainProduct() {
@@ -175,8 +182,27 @@ function ProductEditorModal({ isOpen, onClose, product, category, onSave, onDele
           </div>
         )}
 
-        {/* Max qty for stepper */}
-        {category === 'cross' && form.hasStepper && (
+        {/* hasStepper checkbox for main & services */}
+        {(category === 'main' || category === 'services') && STEPPER_LABELS[category] && (
+          <div className="product-editor__field">
+            <label className="product-editor__label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={!!form.hasStepper}
+                onChange={(e) => {
+                  handleFieldChange('hasStepper', e.target.checked);
+                  if (!e.target.checked) handleFieldChange('maxQty', undefined);
+                  else if (!form.maxQty) handleFieldChange('maxQty', 5);
+                }}
+                style={{ width: '18px', height: '18px', accentColor: 'var(--accent)' }}
+              />
+              {STEPPER_LABELS[category]}
+            </label>
+          </div>
+        )}
+
+        {/* Max qty for stepper (any category) */}
+        {form.hasStepper && (
           <div className="product-editor__field">
             <label className="product-editor__label">Макс. количество</label>
             <input
@@ -276,10 +302,12 @@ function ProductEditorModal({ isOpen, onClose, product, category, onSave, onDele
 
 function ProductCard({ product, category, onClick }) {
   const getTypeLabel = () => {
-    if (category === 'main') return product.type === 'card' ? 'Карта' : 'Переключатель';
-    if (category === 'cross') return product.hasStepper ? 'Со степпером' : 'Обычный';
-    if (category === 'services') return product.type === 'toggle' ? 'Переключатель' : 'Раскрывающийся';
-    return '';
+    let label = '';
+    if (category === 'main') label = product.type === 'card' ? 'Карта' : 'Переключатель';
+    else if (category === 'cross') label = product.hasStepper ? 'Со степпером' : 'Обычный';
+    else if (category === 'services') label = product.type === 'toggle' ? 'Переключатель' : 'Раскрывающийся';
+    if ((category === 'main' || category === 'services') && product.hasStepper) label += ' ×N';
+    return label;
   };
 
   const getPrice = () => {

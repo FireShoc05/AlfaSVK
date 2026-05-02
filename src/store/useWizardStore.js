@@ -20,7 +20,7 @@ export const useWizardStore = create((set) => ({
   prevStep: () => set((s) => ({ currentStep: Math.max(s.currentStep - 1, 1) })),
 
   // Step 1: Main products
-  toggleMainProduct: (productId) => set((s) => {
+  toggleMainProduct: (productId, hasStepper) => set((s) => {
     const current = s.mainProducts[productId];
     if (current?.selected) {
       const updated = { ...s.mainProducts };
@@ -30,7 +30,9 @@ export const useWizardStore = create((set) => ({
     return {
       mainProducts: {
         ...s.mainProducts,
-        [productId]: { selected: true, options: {} },
+        [productId]: hasStepper
+          ? { selected: true, quantity: 1, cards: [{}] }
+          : { selected: true, options: {} },
       },
     };
   }),
@@ -47,6 +49,38 @@ export const useWizardStore = create((set) => ({
       },
     },
   })),
+
+  // For main products with stepper — per-card options
+  setMainCardOption: (productId, cardIndex, optionId, value) => set((s) => {
+    const product = s.mainProducts[productId];
+    if (!product) return {};
+    const cards = [...(product.cards || [])];
+    cards[cardIndex] = { ...cards[cardIndex], [optionId]: value };
+    return {
+      mainProducts: {
+        ...s.mainProducts,
+        [productId]: { ...product, cards },
+      },
+    };
+  }),
+
+  setMainProductQuantity: (productId, quantity) => set((s) => {
+    const product = s.mainProducts[productId];
+    if (!product) return {};
+    const oldCards = product.cards || [];
+    let cards;
+    if (quantity > oldCards.length) {
+      cards = [...oldCards, ...Array(quantity - oldCards.length).fill(null).map(() => ({}))];
+    } else {
+      cards = oldCards.slice(0, quantity);
+    }
+    return {
+      mainProducts: {
+        ...s.mainProducts,
+        [productId]: { ...product, quantity, cards },
+      },
+    };
+  }),
 
   // Step 2: Cross products
   toggleCrossProduct: (productId, hasStepper) => set((s) => {
@@ -125,7 +159,7 @@ export const useWizardStore = create((set) => ({
   })),
 
   // Для expandable-сервисов (БС, КЛ) — переключение
-  toggleExpandableService: (serviceId) => set((s) => {
+  toggleExpandableService: (serviceId, hasStepper) => set((s) => {
     const current = s.services[serviceId];
     if (current?.active) {
       const updated = { ...s.services };
@@ -135,7 +169,9 @@ export const useWizardStore = create((set) => ({
     return {
       services: {
         ...s.services,
-        [serviceId]: { active: true, options: {} },
+        [serviceId]: hasStepper
+          ? { active: true, quantity: 1, cards: [{}] }
+          : { active: true, options: {} },
       },
     };
   }),
@@ -152,6 +188,38 @@ export const useWizardStore = create((set) => ({
       },
     },
   })),
+
+  // For services with stepper — per-card options
+  setServiceCardOption: (serviceId, cardIndex, optionId, value) => set((s) => {
+    const service = s.services[serviceId];
+    if (!service) return {};
+    const cards = [...(service.cards || [])];
+    cards[cardIndex] = { ...cards[cardIndex], [optionId]: value };
+    return {
+      services: {
+        ...s.services,
+        [serviceId]: { ...service, cards },
+      },
+    };
+  }),
+
+  setServiceQuantity: (serviceId, quantity) => set((s) => {
+    const service = s.services[serviceId];
+    if (!service) return {};
+    const oldCards = service.cards || [];
+    let cards;
+    if (quantity > oldCards.length) {
+      cards = [...oldCards, ...Array(quantity - oldCards.length).fill(null).map(() => ({}))];
+    } else {
+      cards = oldCards.slice(0, quantity);
+    }
+    return {
+      services: {
+        ...s.services,
+        [serviceId]: { ...service, quantity, cards },
+      },
+    };
+  }),
 
   // Reset wizard
   resetWizard: () => set({ ...INITIAL_STATE }),

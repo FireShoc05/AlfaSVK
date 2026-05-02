@@ -22,21 +22,44 @@ export function generateMeetingJSON(wizardState, agentName, meetingId, mainProdu
   MAIN_PRODUCTS.forEach((product) => {
     const selected = wizardState.mainProducts[product.id];
     if (selected?.selected) {
-      let earned = product.price;
-      const options = {};
+      // Stepper main product: each card is a separate entry
+      if (product.hasStepper) {
+        const cards = selected.cards || [];
+        cards.forEach((card, i) => {
+          let earned = product.price;
+          const options = {};
+          product.options.forEach((opt) => {
+            const isChecked = !!card[opt.id];
+            options[opt.label] = isChecked;
+            if (isChecked) earned += opt.bonus;
+          });
 
-      product.options.forEach((opt) => {
-        const isChecked = !!selected.options[opt.id];
-        options[opt.label] = isChecked;
-        if (isChecked) earned += opt.bonus;
-      });
+          products.push({
+            type: 'main',
+            name: `${product.name} #${i + 1}`,
+            quantity: 1,
+            options,
+            earned,
+          });
+        });
+      } else {
+        // Non-stepper main product
+        let earned = product.price;
+        const options = {};
 
-      products.push({
-        type: 'main',
-        name: product.name,
-        options,
-        earned,
-      });
+        product.options.forEach((opt) => {
+          const isChecked = !!selected.options[opt.id];
+          options[opt.label] = isChecked;
+          if (isChecked) earned += opt.bonus;
+        });
+
+        products.push({
+          type: 'main',
+          name: product.name,
+          options,
+          earned,
+        });
+      }
     }
   });
 
@@ -88,30 +111,70 @@ export function generateMeetingJSON(wizardState, agentName, meetingId, mainProdu
   // Services
   SERVICES.forEach((service) => {
     if (service.type === 'toggle') {
-      if (wizardState.services[service.id]) {
-        products.push({
-          type: 'service',
-          name: service.name,
-          options: {},
-          earned: service.bonus,
-        });
+      if (service.hasStepper) {
+        // Toggle service with stepper: multiple instances
+        const state = wizardState.services[service.id];
+        if (state?.active) {
+          const count = state.quantity || 1;
+          for (let i = 0; i < count; i++) {
+            products.push({
+              type: 'service',
+              name: count > 1 ? `${service.name} #${i + 1}` : service.name,
+              quantity: 1,
+              options: {},
+              earned: service.bonus,
+            });
+          }
+        }
+      } else {
+        // Simple toggle service
+        if (wizardState.services[service.id]) {
+          products.push({
+            type: 'service',
+            name: service.name,
+            options: {},
+            earned: service.bonus,
+          });
+        }
       }
     } else if (service.type === 'expandable') {
       const state = wizardState.services[service.id];
       if (state?.active) {
-        let earned = service.bonus;
-        const options = {};
-        service.options?.forEach((opt) => {
-          const isChecked = !!state.options?.[opt.id];
-          options[opt.label] = isChecked;
-          if (isChecked) earned += opt.bonus;
-        });
-        products.push({
-          type: 'service',
-          name: service.name,
-          options,
-          earned,
-        });
+        if (service.hasStepper) {
+          // Expandable with stepper: each card is a separate entry
+          const cards = state.cards || [];
+          cards.forEach((card, i) => {
+            let earned = service.bonus;
+            const options = {};
+            service.options?.forEach((opt) => {
+              const isChecked = !!card[opt.id];
+              options[opt.label] = isChecked;
+              if (isChecked) earned += opt.bonus;
+            });
+            products.push({
+              type: 'service',
+              name: cards.length > 1 ? `${service.name} #${i + 1}` : service.name,
+              quantity: 1,
+              options,
+              earned,
+            });
+          });
+        } else {
+          // Expandable without stepper (original behavior)
+          let earned = service.bonus;
+          const options = {};
+          service.options?.forEach((opt) => {
+            const isChecked = !!state.options?.[opt.id];
+            options[opt.label] = isChecked;
+            if (isChecked) earned += opt.bonus;
+          });
+          products.push({
+            type: 'service',
+            name: service.name,
+            options,
+            earned,
+          });
+        }
       }
     }
   });
@@ -141,10 +204,21 @@ export function calculateTotal(wizardState, mainProducts, crossProducts, service
   MAIN_PRODUCTS.forEach((product) => {
     const selected = wizardState.mainProducts[product.id];
     if (selected?.selected) {
-      total += product.price;
-      product.options.forEach((opt) => {
-        if (selected.options[opt.id]) total += opt.bonus;
-      });
+      if (product.hasStepper) {
+        // Stepper: each card contributes base price + checked options
+        const cards = selected.cards || [];
+        cards.forEach((card) => {
+          total += product.price;
+          product.options.forEach((opt) => {
+            if (card[opt.id]) total += opt.bonus;
+          });
+        });
+      } else {
+        total += product.price;
+        product.options.forEach((opt) => {
+          if (selected.options[opt.id]) total += opt.bonus;
+        });
+      }
     }
   });
 
@@ -172,16 +246,35 @@ export function calculateTotal(wizardState, mainProducts, crossProducts, service
   // Services
   SERVICES.forEach((service) => {
     if (service.type === 'toggle') {
-      if (wizardState.services[service.id]) {
-        total += service.bonus;
+      if (service.hasStepper) {
+        const state = wizardState.services[service.id];
+        if (state?.active) {
+          const count = state.quantity || 1;
+          total += service.bonus * count;
+        }
+      } else {
+        if (wizardState.services[service.id]) {
+          total += service.bonus;
+        }
       }
     } else if (service.type === 'expandable') {
       const state = wizardState.services[service.id];
       if (state?.active) {
-        total += service.bonus; // базовая (0)
-        service.options?.forEach((opt) => {
-          if (state.options?.[opt.id]) total += opt.bonus;
-        });
+        if (service.hasStepper) {
+          // Stepper: base bonus per card + card options
+          const cards = state.cards || [];
+          cards.forEach((card) => {
+            total += service.bonus;
+            service.options?.forEach((opt) => {
+              if (card[opt.id]) total += opt.bonus;
+            });
+          });
+        } else {
+          total += service.bonus; // базовая (0)
+          service.options?.forEach((opt) => {
+            if (state.options?.[opt.id]) total += opt.bonus;
+          });
+        }
       }
     }
   });
