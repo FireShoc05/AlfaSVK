@@ -413,6 +413,7 @@ export function WizardContainer({ onBack }) {
   const CROSS_PRODUCTS = useSettingsStore((s) => s.productsCross);
   const SERVICES = useSettingsStore((s) => s.productsServices);
   const fetchProducts = useSettingsStore((s) => s.fetchProducts);
+  const productsLoaded = useSettingsStore((s) => s.productsLoaded);
   const total = calculateTotal(store, MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES);
   const addMeeting = useMeetingsStore((s) => s.addMeeting);
   const user = useAuthStore((s) => s.user);
@@ -492,10 +493,18 @@ export function WizardContainer({ onBack }) {
       <StepIndicator current={currentStep} />
       <StickyBank total={total} />
 
-      {currentStep === 1 && <Step1 />}
-      {currentStep === 2 && <Step2 />}
-      {currentStep === 3 && <Step3 />}
-      {currentStep === 4 && <Step4 onComplete={handleComplete} onDelete={handleDelete} />}
+      {!productsLoaded ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-secondary)', fontSize: '15px' }}>
+          <p>⏳ Загрузка товаров...</p>
+        </div>
+      ) : (
+        <>
+          {currentStep === 1 && <Step1 />}
+          {currentStep === 2 && <Step2 />}
+          {currentStep === 3 && <Step3 />}
+          {currentStep === 4 && <Step4 onComplete={handleComplete} onDelete={handleDelete} />}
+        </>
+      )}
 
       {currentStep < 4 && (
         <div className="wizard-actions">

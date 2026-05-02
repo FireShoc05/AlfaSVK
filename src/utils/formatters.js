@@ -1,4 +1,4 @@
-import { MAIN_PRODUCTS as DEFAULT_MAIN, CROSS_PRODUCTS as DEFAULT_CROSS, SERVICES as DEFAULT_SERVICES } from '../data/products';
+
 
 /**
  * Форматирует число как валюту (рубли)
@@ -12,9 +12,9 @@ export function formatCurrency(amount) {
  * Генерирует JSON встречи для отправки на бэкенд
  */
 export function generateMeetingJSON(wizardState, agentName, meetingId, mainProducts, crossProducts, services) {
-  const MAIN_PRODUCTS = mainProducts || DEFAULT_MAIN;
-  const CROSS_PRODUCTS = crossProducts || DEFAULT_CROSS;
-  const SERVICES = services || DEFAULT_SERVICES;
+  const MAIN_PRODUCTS = mainProducts || [];
+  const CROSS_PRODUCTS = crossProducts || [];
+  const SERVICES = services || [];
 
   const products = [];
 
@@ -131,9 +131,9 @@ export function generateMeetingJSON(wizardState, agentName, meetingId, mainProdu
  * Рассчитывает итоговую сумму из стейта визарда
  */
 export function calculateTotal(wizardState, mainProducts, crossProducts, services) {
-  const MAIN_PRODUCTS = mainProducts || DEFAULT_MAIN;
-  const CROSS_PRODUCTS = crossProducts || DEFAULT_CROSS;
-  const SERVICES = services || DEFAULT_SERVICES;
+  const MAIN_PRODUCTS = mainProducts || [];
+  const CROSS_PRODUCTS = crossProducts || [];
+  const SERVICES = services || [];
 
   let total = 0;
 

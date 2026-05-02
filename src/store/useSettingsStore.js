@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
-import { MAIN_PRODUCTS, CROSS_PRODUCTS, SERVICES } from '../data/products';
 
 const DEFAULT_LINKS = {
   max_url: '',
@@ -46,10 +45,10 @@ export const useSettingsStore = create((set, get) => ({
   customLinks: [],
   loaded: false,
 
-  // Products (dynamic, with hardcoded fallback)
-  productsMain: [...MAIN_PRODUCTS],
-  productsCross: [...CROSS_PRODUCTS],
-  productsServices: [...SERVICES],
+  // Products (loaded from DB per group)
+  productsMain: [],
+  productsCross: [],
+  productsServices: [],
   productsLoaded: false,
 
   // Leaderboard config
