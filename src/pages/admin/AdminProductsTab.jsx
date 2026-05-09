@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Save, Check, Edit3, X, CreditCard, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Package, Plus, Trash2, Save, Check, Edit3, X, CreditCard, Wrench, ChevronDown, ChevronUp, Download, Upload, FileCheck } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { GlassCard, Button, Modal } from '../../components/ui';
+import { exportConfig, importConfig, summariseConfig } from '../../utils/configIO';
 import '../../styles/admin.css';
 
 /* ── Helpers ──────────────────────────────────── */
@@ -519,6 +520,337 @@ function ChangesPreviewModal({ isOpen, onClose, diffs, onConfirm, onRevertAll, s
   );
 }
 
+/* ── Config Export Modal ──────────────────────── */
+
+function ConfigExportModal({ isOpen, onClose }) {
+  const {
+    productsMain, productsCross, productsServices,
+    leaderboardTabs, links, customLinks,
+  } = useSettingsStore();
+
+  const [sections, setSections] = useState({ products: true, leaderboard: true, links: true });
+
+  const toggle = (key) => setSections((s) => ({ ...s, [key]: !s[key] }));
+  const anySelected = sections.products || sections.leaderboard || sections.links;
+
+  const handleExport = () => {
+    exportConfig(
+      { productsMain, productsCross, productsServices, leaderboardTabs, links, customLinks },
+      sections,
+    );
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Скачать конфигурацию">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', margin: 0 }}>
+          Выберите, какие разделы включить в файл конфигурации.
+        </p>
+
+        <div className="config-modal__sections">
+          {/* Products */}
+          <label className="config-modal__section">
+            <input
+              type="checkbox"
+              className="config-modal__section-checkbox"
+              checked={sections.products}
+              onChange={() => toggle('products')}
+            />
+            <div className="config-modal__section-info">
+              <div className="config-modal__section-title">📦 Товары и услуги</div>
+              <div className="config-modal__section-desc">
+                Основные, доп. продукты и услуги
+              </div>
+              <div className="config-modal__section-stats">
+                <span className="config-modal__stat-badge">Основные: {productsMain.length}</span>
+                <span className="config-modal__stat-badge">Доп.: {productsCross.length}</span>
+                <span className="config-modal__stat-badge">Услуги: {productsServices.length}</span>
+              </div>
+            </div>
+          </label>
+
+          {/* Leaderboard */}
+          <label className="config-modal__section">
+            <input
+              type="checkbox"
+              className="config-modal__section-checkbox"
+              checked={sections.leaderboard}
+              onChange={() => toggle('leaderboard')}
+            />
+            <div className="config-modal__section-info">
+              <div className="config-modal__section-title">🏆 Лидерборд</div>
+              <div className="config-modal__section-desc">
+                Настройки вкладок рейтинга
+              </div>
+              <div className="config-modal__section-stats">
+                <span className="config-modal__stat-badge">Вкладок: {leaderboardTabs.length}</span>
+              </div>
+            </div>
+          </label>
+
+          {/* Links */}
+          <label className="config-modal__section">
+            <input
+              type="checkbox"
+              className="config-modal__section-checkbox"
+              checked={sections.links}
+              onChange={() => toggle('links')}
+            />
+            <div className="config-modal__section-info">
+              <div className="config-modal__section-title">🔗 Ссылки</div>
+              <div className="config-modal__section-desc">
+                Быстрые и пользовательские ссылки
+              </div>
+              <div className="config-modal__section-stats">
+                <span className="config-modal__stat-badge">
+                  Пользов.: {customLinks.length}
+                </span>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div className="config-modal__actions">
+          <Button variant="ghost" size="sm" onClick={onClose}>Отмена</Button>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!anySelected}
+            onClick={handleExport}
+          >
+            <Download size={14} /> Скачать файл
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+/* ── Config Import Modal ─────────────────────── */
+
+function ConfigImportModal({ isOpen, onClose, onImport }) {
+  const [file, setFile] = useState(null);
+  const [parsed, setParsed] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState('');
+  const [sections, setSections] = useState({ products: true, leaderboard: true, links: true });
+  const [dragging, setDragging] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const reset = useCallback(() => {
+    setFile(null);
+    setParsed(null);
+    setSummary(null);
+    setError('');
+    setSections({ products: true, leaderboard: true, links: true });
+    setDragging(false);
+    setImporting(false);
+  }, []);
+
+  // Reset when modal closes
+  useEffect(() => {
+    if (!isOpen) reset();
+  }, [isOpen, reset]);
+
+  const handleFile = async (f) => {
+    setError('');
+    setParsed(null);
+    setSummary(null);
+    setFile(f);
+
+    try {
+      const result = await importConfig(f);
+      const sum = summariseConfig(result);
+      setParsed(result);
+      setSummary(sum);
+      // Auto-check available sections, uncheck unavailable
+      setSections({
+        products: sum.products.available,
+        leaderboard: sum.leaderboard.available,
+        links: sum.links.available,
+      });
+    } catch (err) {
+      setError(err.message);
+      setFile(null);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    const f = e.dataTransfer?.files?.[0];
+    if (f) handleFile(f);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragging(true);
+  };
+
+  const handleDragLeave = () => setDragging(false);
+
+  const handleInputChange = (e) => {
+    const f = e.target.files?.[0];
+    if (f) handleFile(f);
+  };
+
+  const toggle = (key) => {
+    if (!summary?.[key]?.available) return;
+    setSections((s) => ({ ...s, [key]: !s[key] }));
+  };
+
+  const anySelected = sections.products || sections.leaderboard || sections.links;
+
+  const handleImport = async () => {
+    if (!parsed) return;
+    setImporting(true);
+    await onImport(parsed, sections);
+    setImporting(false);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Загрузить конфигурацию">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+
+        {/* Dropzone or file info */}
+        {!file ? (
+          <div
+            className={`config-modal__dropzone ${dragging ? 'config-modal__dropzone--active' : ''}`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload size={32} className="config-modal__dropzone-icon" />
+            <div className="config-modal__dropzone-text">Перетащите файл сюда</div>
+            <div className="config-modal__dropzone-hint">или нажмите для выбора (.alfacfg)</div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".alfacfg"
+              onChange={handleInputChange}
+              style={{ display: 'none' }}
+            />
+          </div>
+        ) : (
+          <div className="config-modal__file-info">
+            <FileCheck size={18} />
+            <span className="config-modal__file-info-name">{file.name}</span>
+            <button
+              className="config-modal__file-info-remove"
+              onClick={() => { reset(); }}
+              title="Убрать файл"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && <div className="config-modal__error">⚠️ {error}</div>}
+
+        {/* Section selection (only after successful parse) */}
+        {summary && (
+          <>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', margin: 0 }}>
+              Выберите разделы для импорта. Данные полностью заменят текущие.
+            </p>
+
+            <div className="config-modal__sections">
+              {/* Products */}
+              <label className={`config-modal__section ${!summary.products.available ? 'config-modal__section--disabled' : ''}`}>
+                <input
+                  type="checkbox"
+                  className="config-modal__section-checkbox"
+                  checked={sections.products}
+                  onChange={() => toggle('products')}
+                  disabled={!summary.products.available}
+                />
+                <div className="config-modal__section-info">
+                  <div className="config-modal__section-title">📦 Товары и услуги</div>
+                  {summary.products.available ? (
+                    <div className="config-modal__section-stats">
+                      <span className="config-modal__stat-badge">Основные: {summary.products.mainCount}</span>
+                      <span className="config-modal__stat-badge">Доп.: {summary.products.crossCount}</span>
+                      <span className="config-modal__stat-badge">Услуги: {summary.products.servicesCount}</span>
+                    </div>
+                  ) : (
+                    <div className="config-modal__section-desc">Нет в файле</div>
+                  )}
+                </div>
+              </label>
+
+              {/* Leaderboard */}
+              <label className={`config-modal__section ${!summary.leaderboard.available ? 'config-modal__section--disabled' : ''}`}>
+                <input
+                  type="checkbox"
+                  className="config-modal__section-checkbox"
+                  checked={sections.leaderboard}
+                  onChange={() => toggle('leaderboard')}
+                  disabled={!summary.leaderboard.available}
+                />
+                <div className="config-modal__section-info">
+                  <div className="config-modal__section-title">🏆 Лидерборд</div>
+                  {summary.leaderboard.available ? (
+                    <div className="config-modal__section-stats">
+                      <span className="config-modal__stat-badge">Вкладок: {summary.leaderboard.count}</span>
+                    </div>
+                  ) : (
+                    <div className="config-modal__section-desc">Нет в файле</div>
+                  )}
+                </div>
+              </label>
+
+              {/* Links */}
+              <label className={`config-modal__section ${!summary.links.available ? 'config-modal__section--disabled' : ''}`}>
+                <input
+                  type="checkbox"
+                  className="config-modal__section-checkbox"
+                  checked={sections.links}
+                  onChange={() => toggle('links')}
+                  disabled={!summary.links.available}
+                />
+                <div className="config-modal__section-info">
+                  <div className="config-modal__section-title">🔗 Ссылки</div>
+                  {summary.links.available ? (
+                    <div className="config-modal__section-stats">
+                      <span className="config-modal__stat-badge">Пользов.: {summary.links.customLinksCount}</span>
+                    </div>
+                  ) : (
+                    <div className="config-modal__section-desc">Нет в файле</div>
+                  )}
+                </div>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* Actions */}
+        <div className="config-modal__actions">
+          <Button variant="ghost" size="sm" onClick={onClose}>Отмена</Button>
+          {summary && (
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={!anySelected || importing}
+              onClick={handleImport}
+            >
+              <Upload size={14} /> {importing ? 'Импорт...' : 'Импортировать'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 /* ════════════════════════════════════════════════
    AdminProductsTab — Main Export
    ════════════════════════════════════════════════ */
@@ -526,7 +858,9 @@ function ChangesPreviewModal({ isOpen, onClose, diffs, onConfirm, onRevertAll, s
 export function AdminProductsTab() {
   const {
     productsMain, productsCross, productsServices,
-    fetchProducts, saveProductsMain, saveProductsCross, saveProductsServices
+    fetchProducts, saveProductsMain, saveProductsCross, saveProductsServices,
+    leaderboardTabs, fetchLeaderboardTabs, saveLeaderboardTabs,
+    links, customLinks, fetchLinks, saveLinks, saveCustomLinks,
   } = useSettingsStore();
   const { user } = useAuthStore();
 
@@ -547,6 +881,10 @@ export function AdminProductsTab() {
   // Changes preview modal
   const [showPreview, setShowPreview] = useState(false);
 
+  // Config modals
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+
   // Save state
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -554,8 +892,10 @@ export function AdminProductsTab() {
   useEffect(() => {
     if (user?.group_id) {
       fetchProducts(user.group_id);
+      fetchLeaderboardTabs(user.group_id);
+      fetchLinks(user.group_id);
     }
-  }, [fetchProducts, user?.group_id]);
+  }, [fetchProducts, fetchLeaderboardTabs, fetchLinks, user?.group_id]);
 
   // Sync local + snapshot when store data loads
   useEffect(() => {
@@ -660,14 +1000,53 @@ export function AdminProductsTab() {
     }
   };
 
+  // ─── Import handler ───────────────────────────
+
+  const handleConfigImport = async (parsedConfig, selectedSections) => {
+    const s = parsedConfig.sections;
+
+    // Products → replace local state (user must press Save)
+    if (selectedSections.products && s.products) {
+      setLocalMain(s.products.main || []);
+      setLocalCross(s.products.cross || []);
+      setLocalServices(s.products.services || []);
+      setSaved(false);
+    }
+
+    // Leaderboard → save directly to Supabase
+    if (selectedSections.leaderboard && s.leaderboard) {
+      await saveLeaderboardTabs(s.leaderboard, user?.group_id);
+    }
+
+    // Links → save directly to Supabase
+    if (selectedSections.links && s.links) {
+      if (s.links.quick_links) {
+        await saveLinks(s.links.quick_links, user?.group_id);
+      }
+      if (s.links.custom_links) {
+        await saveCustomLinks(s.links.custom_links, user?.group_id);
+      }
+    }
+  };
+
   const dirty = isDirty();
 
   return (
     <>
-      <div style={{ marginBottom: 'var(--space-lg)' }}>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)' }}>
-          Управляйте продуктами и услугами. Изменения вступят в силу для всех агентов после сохранения.
-        </p>
+      <div className="config-header">
+        <div className="config-header__desc">
+          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', margin: 0 }}>
+            Управляйте продуктами и услугами. Изменения вступят в силу для всех агентов после сохранения.
+          </p>
+        </div>
+        <div className="config-toolbar">
+          <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
+            <Download size={14} /> Скачать конфигурацию
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
+            <Upload size={14} /> Загрузить конфигурацию
+          </Button>
+        </div>
       </div>
 
       <CategorySection
@@ -737,6 +1116,18 @@ export function AdminProductsTab() {
         onConfirm={handleConfirmSave}
         onRevertAll={handleRevertAll}
         saving={saving}
+      />
+
+      {/* Config export / import modals */}
+      <ConfigExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
+
+      <ConfigImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleConfigImport}
       />
     </>
   );
